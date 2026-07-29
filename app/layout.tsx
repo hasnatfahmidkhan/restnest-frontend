@@ -1,4 +1,7 @@
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
+import { ThemeProvider } from "@/providers/theme-provider";
 import { Geist, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -18,25 +21,19 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(geist.variable, jakarta.variable, "font-sans")}
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const theme = localStorage.getItem('theme') || 'light';
-                if (theme === 'dark') {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-              } catch (e) {}
-            `,
-          }}
-        />
-      </head>
-
       <body className="min-h-screen flex flex-col bg-background text-foreground">
-        {children}
+        <ThemeProvider
+          attribute={"class"}
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ReactQueryProvider>
+            <Toaster richColors position="top-right" />
+
+            {children}
+          </ReactQueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
