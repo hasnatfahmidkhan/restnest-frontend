@@ -2,9 +2,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-import { TLoginInput } from "@/app/(auth)/_schemas/auth.schema";
+import { TLoginInput, TRegisterInput } from "@/app/(auth)/_schemas/auth.schema";
 
-import { getMeService, loginService } from "@/app/(auth)/_sevices/auth.service";
+import {
+  getMeService,
+  loginService,
+  registerService,
+} from "@/app/(auth)/_sevices/auth.service";
 import { UserRole } from "@/app/(auth)/_types/auth.types";
 import { deleteCookie } from "@/services/deleteCookie";
 import { useAuthStore } from "@/store/auth-store";
@@ -67,7 +71,7 @@ export const useLogout = () => {
       router.refresh();
 
       toast.success("Logged out successfully");
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to logout");
     }
@@ -76,6 +80,41 @@ export const useLogout = () => {
   return { logout };
 };
 
+export const useRegister = () => {
+  const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
+
+  return useMutation({
+    mutationFn: async (payload: TRegisterInput) => {
+      // 1. First, register the user
+      await registerService(payload);
+
+      // 2. If registration succeeds, automatically login to get the HTTP-only cookies
+      const { email, password } = payload;
+      return await loginService({ email, password });
+    },
+    onSuccess: (data) => {
+      // 3. The data here comes from the loginService (contains userData)
+      const { userData } = data.data;
+
+      // 4. Set user to global state
+      setUser(userData);
+
+      toast.success("Account created successfully!", {
+        description: `Welcome to RentNest, ${userData.email}`,
+      });
+
+      // 5. Redirect to their role-based dashboard
+      router.push(ROLE_REDIRECTS[userData.role]);
+    },
+    onError: (error: Error) => {
+      // If register fails OR auto-login fails, show the error
+      toast.error("Registration failed", {
+        description: error.message,
+      });
+    },
+  });
+};
 export const useInitializeAuth = () => {
   const setUser = useAuthStore((state) => state.setUser);
 
