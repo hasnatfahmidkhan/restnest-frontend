@@ -1,7 +1,7 @@
 "use client";
 
+import { useLogout } from "@/hooks/auth.hooks";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/store/auth-store"; // Import store for logout
 import {
   ChevronDown,
   LayoutDashboard,
@@ -34,12 +34,10 @@ export function UserDropdown({ email, role }: UserDropdownProps) {
   const displayName = email.split("@")[0];
   const dashboardHref = ROLE_DASHBOARD[role];
 
-  const logout = useAuthStore((state) => state.logout);
+  const { logout } = useLogout();
 
   const handleLogout = () => {
     logout();
-    // Optionally redirect to home or login page
-    window.location.href = "/login";
   };
 
   return (
