@@ -1,13 +1,9 @@
+import { Navbar } from "@/components/shared/navbar";
 import { cn } from "@/lib/utils";
-import { Inter, Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Geist, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -16,22 +12,34 @@ const jakarta = Plus_Jakarta_Sans({
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={cn(
-        "h-full",
-        "antialiased",
-        inter.variable,
-        jakarta.variable,
-        "font-sans",
-        outfit.variable,
-      )}
+      suppressHydrationWarning
+      className={cn(geist.variable, jakarta.variable, "font-sans")}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme') || 'light';
+                if (theme === 'dark') {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+
+      <body className="min-h-screen flex flex-col bg-background text-foreground">
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }
