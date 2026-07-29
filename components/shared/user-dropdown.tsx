@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store"; // Import store for logout
 import {
   ChevronDown,
   LayoutDashboard,
@@ -23,9 +24,9 @@ const ROLE_BADGE: Record<string, string> = {
 };
 
 const ROLE_DASHBOARD: Record<string, string> = {
-  TENANT: "/tenant/rentals",
-  LANDLORD: "/landlord/dashboard",
-  ADMIN: "/admin/dashboard",
+  TENANT: "/dashboard/tenant",
+  LANDLORD: "/dashboard/landlord",
+  ADMIN: "/dashboard/admin",
 };
 
 export function UserDropdown({ email, role }: UserDropdownProps) {
@@ -33,13 +34,21 @@ export function UserDropdown({ email, role }: UserDropdownProps) {
   const displayName = email.split("@")[0];
   const dashboardHref = ROLE_DASHBOARD[role];
 
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = () => {
+    logout();
+    // Optionally redirect to home or login page
+    window.location.href = "/login";
+  };
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
           aria-label="Open user menu"
-          className="group flex items-center gap-1.5 rounded-full border border-border/60 bg-background py-1 pl-1 pr-2 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group flex items-center gap-1.5 rounded-full border border-border/60 bg-background py-1 pl-1 pr-2 transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase text-primary-foreground">
             {initial}
@@ -97,7 +106,10 @@ export function UserDropdown({ email, role }: UserDropdownProps) {
 
           <DropdownMenu.Separator className="my-1 h-px bg-border/60" />
 
-          <DropdownMenu.Item className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm text-destructive outline-none transition-colors hover:bg-destructive/10 data-highlighted:bg-destructive/10">
+          <DropdownMenu.Item
+            onClick={handleLogout}
+            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm text-destructive outline-none transition-colors hover:bg-destructive/10 data-highlighted:bg-destructive/10"
+          >
             <LogOut className="h-4 w-4" />
             Log out
           </DropdownMenu.Item>

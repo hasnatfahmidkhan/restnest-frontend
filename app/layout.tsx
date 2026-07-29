@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+import { AuthProvider } from "@/providers/authProvider";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Geist, Plus_Jakarta_Sans } from "next/font/google";
@@ -29,9 +30,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReactQueryProvider>
-            <Toaster richColors position="top-right" />
+            <AuthProvider>
+              <Toaster richColors position="top-right" />
 
-            {children}
+              {children}
+            </AuthProvider>
           </ReactQueryProvider>
         </ThemeProvider>
       </body>

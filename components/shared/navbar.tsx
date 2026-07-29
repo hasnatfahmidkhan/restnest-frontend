@@ -1,48 +1,49 @@
 "use client";
 
+import { UserRole } from "@/app/(auth)/_types/auth.types";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 import { Home, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
 import { ThemeToggler } from "./theme-toggler";
 import { UserDropdown } from "./user-dropdown";
 
-//  Demo user — replace with zustand/auth store later
-const user = {
-  email: "tenant@rentnest.com",
-  role: "TENANT" as "TENANT" | "LANDLORD" | "ADMIN",
-};
-
-const ROLE_ROUTES: Record<string, { label: string; href: string }[]> = {
+// Updated routes to match /dashboard/[role] structure
+const ROLE_ROUTES: Record<UserRole, { label: string; href: string }[]> = {
   TENANT: [
     { label: "Home", href: "/" },
     { label: "Properties", href: "/properties" },
-    { label: "My Rentals", href: "/tenant/rentals" },
-    { label: "Payments", href: "/tenant/payments" },
+    { label: "Dashboard", href: "/dashboard/tenant" },
   ],
   LANDLORD: [
     { label: "Home", href: "/" },
     { label: "Properties", href: "/properties" },
-    { label: "Dashboard", href: "/landlord/dashboard" },
-    { label: "My Properties", href: "/landlord/properties" },
-    { label: "Requests", href: "/landlord/requests" },
+    { label: "Dashboard", href: "/dashboard/landlord" },
   ],
   ADMIN: [
     { label: "Home", href: "/" },
     { label: "Properties", href: "/properties" },
-    { label: "Dashboard", href: "/admin/dashboard" },
-    { label: "Users", href: "/admin/users" },
-    { label: "Rentals", href: "/admin/rentals" },
+    { label: "Dashboard", href: "/dashboard/admin" },
   ],
 };
+
+const PUBLIC_ROUTES = [
+  { label: "Home", href: "/" },
+  { label: "Properties", href: "/properties" },
+];
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const routes = ROLE_ROUTES[user.role] ?? ROLE_ROUTES.TENANT;
+  // Get user from global state
+  const user = useAuthStore((state) => state.user);
+
+  // Determine which routes to show based on auth status
+  const routes = user ? ROLE_ROUTES[user.role] : PUBLIC_ROUTES;
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -88,10 +89,23 @@ export function Navbar() {
           })}
         </div>
 
-        {/* ── Right: Toggler + Dropdown + Mobile toggle ── */}
+        {/* ── Right: Toggler + Auth/UserDropdown ──────── */}
         <div className="flex items-center gap-1.5">
           <ThemeToggler />
-          <UserDropdown email={user.email} role={user.role} />
+
+          {/* Conditional Rendering: Auth Buttons vs User Dropdown */}
+          {user ? (
+            <UserDropdown email={user.email} role={user.role} />
+          ) : (
+            <div className="hidden items-center gap-2 md:flex">
+              <Button variant="ghost" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/register">Register</Link>
+              </Button>
+            </div>
+          )}
 
           <button
             type="button"
@@ -111,7 +125,7 @@ export function Navbar() {
       {/* ── Mobile menu ──────────────────────────── */}
       {mobileOpen && (
         <div className="border-t border-border/60 bg-background md:hidden">
-          <div className="space-y-0.5 px-4 py-3">
+          <div className="space-y-1 px-4 py-3">
             {routes.map((route) => {
               const active = isActive(route.href);
               return (
@@ -130,6 +144,22 @@ export function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Mobile Auth Buttons */}
+            {!user && (
+              <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4">
+                <Button variant="outline" asChild>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}>
+                    Login
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/register" onClick={() => setMobileOpen(false)}>
+                    Register
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}

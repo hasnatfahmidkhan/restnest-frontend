@@ -1,10 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { TLoginInput } from "@/app/(auth)/_schemas/auth.schema";
 
-import { loginService } from "@/app/(auth)/_sevices/auth.service";
+import { getMeService, loginService } from "@/app/(auth)/_sevices/auth.service";
 import { UserRole } from "@/app/(auth)/_types/auth.types";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -38,5 +38,22 @@ export const useLogin = () => {
         description: error.message,
       });
     },
+  });
+};
+
+export const useInitializeAuth = () => {
+  const setUser = useAuthStore((state) => state.setUser);
+
+  return useQuery({
+    queryKey: ["auth-me"],
+    queryFn: async () => {
+      const user = await getMeService();
+      // Save to Zustand global state
+      setUser(user);
+      return user;
+    },
+    retry: false, // Don't retry if token is invalid/expired
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
   });
 };
