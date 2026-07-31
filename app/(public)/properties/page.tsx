@@ -1,9 +1,10 @@
+import { Container } from "@/components/shared/container";
 import PropertyFilters from "../_component/propertyFilters";
 import PropertyListings from "../_component/PropertyListings";
 
 export default function PropertiesPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Container className="px-4 py-8">
       <h1 className="text-3xl font-heading font-bold mb-8 text-foreground">
         Available Properties
       </h1>
@@ -19,6 +20,6 @@ export default function PropertiesPage() {
           <PropertyListings />
         </main>
       </div>
-    </div>
+    </Container>
   );
 }

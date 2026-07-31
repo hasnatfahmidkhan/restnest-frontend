@@ -11,49 +11,48 @@ import { useState } from "react";
 import { ThemeToggler } from "./theme-toggler";
 import { UserDropdown } from "./user-dropdown";
 
-// Updated routes to match /dashboard/[role] structure
-const ROLE_ROUTES: Record<UserRole, { label: string; href: string }[]> = {
-  TENANT: [
-    { label: "Home", href: "/" },
-    { label: "Properties", href: "/properties" },
-    { label: "Dashboard", href: "/dashboard/tenant" },
-  ],
-  LANDLORD: [
-    { label: "Home", href: "/" },
-    { label: "Properties", href: "/properties" },
-    { label: "Dashboard", href: "/dashboard/landlord" },
-  ],
-  ADMIN: [
-    { label: "Home", href: "/" },
-    { label: "Properties", href: "/properties" },
-    { label: "Dashboard", href: "/dashboard/admin" },
-  ],
-};
+interface NavRoute {
+  label: string;
+  href: string;
+}
 
-const PUBLIC_ROUTES = [
+// লগআউট থাকা অবস্থায় যেসব রুট দেখাবে
+const PUBLIC_ROUTES: NavRoute[] = [
   { label: "Home", href: "/" },
   { label: "Properties", href: "/properties" },
   { label: "About", href: "/about" },
-  { label: "contact", href: "/contact" },
+  { label: "Contact", href: "/contact" },
 ];
+
+const ROLE_DASHBOARD_MAP: Record<UserRole, string> = {
+  TENANT: "/dashboard/tenant",
+  LANDLORD: "/dashboard/landlord",
+  ADMIN: "/dashboard/admin",
+};
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Get user from global state
   const user = useAuthStore((state) => state.user);
 
-  // Determine which routes to show based on auth status
-  const routes = user ? ROLE_ROUTES[user.role] : PUBLIC_ROUTES;
+  const routes: NavRoute[] = user
+    ? [
+        { label: "Home", href: "/" },
+        { label: "Properties", href: "/properties" },
+        { label: "Dashboard", href: ROLE_DASHBOARD_MAP[user.role] },
+        { label: "About", href: "/about" },
+        { label: "Contact", href: "/contact" },
+      ]
+    : PUBLIC_ROUTES;
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* ── Left: Logo ───────────────────────────── */}
+        {/* Left: Logo */}
         <Link
           href="/"
           className="flex shrink-0 items-center gap-2.5"
@@ -67,7 +66,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* ── Middle: Desktop routes ───────────────── */}
+        {/* Middle: Desktop Links */}
         <div className="hidden items-center gap-1 md:flex">
           {routes.map((route) => {
             const active = isActive(route.href);
@@ -91,11 +90,10 @@ export function Navbar() {
           })}
         </div>
 
-        {/* ── Right: Toggler + Auth/UserDropdown ──────── */}
+        {/* Right: Actions */}
         <div className="flex items-center gap-1.5">
           <ThemeToggler />
 
-          {/* Conditional Rendering: Auth Buttons vs User Dropdown */}
           {user ? (
             <UserDropdown email={user.email} role={user.role} />
           ) : (
@@ -112,8 +110,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Toggle menu"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground md:hidden"
           >
             {mobileOpen ? (
               <X className="h-5 w-5" />
@@ -124,7 +121,7 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile menu ──────────────────────────── */}
+      {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="border-t border-border/60 bg-background md:hidden">
           <div className="space-y-1 px-4 py-3">
@@ -147,7 +144,6 @@ export function Navbar() {
               );
             })}
 
-            {/* Mobile Auth Buttons */}
             {!user && (
               <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4">
                 <Button variant="outline" asChild>

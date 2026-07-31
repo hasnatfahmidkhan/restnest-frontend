@@ -41,7 +41,7 @@ export default function Newsletter() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-grow bg-transparent px-5 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="grow bg-transparent px-5 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
             <Button
               type="submit"
@@ -52,7 +52,7 @@ export default function Newsletter() {
             </Button>
 
             {/* Border Beam Effect */}
-            <div className="absolute inset-0 rounded-full pointer-events-none border-2 border-transparent [mask-image:linear-gradient(white,transparent)] [animation:border-beam_3s_infinite]" />
+            <div className="absolute inset-0 rounded-full pointer-events-none border-2 border-transparent mask-[linear-gradient(white,transparent)] animate-[border-beam_3s_infinite]" />
           </div>
         </form>
       </div>
