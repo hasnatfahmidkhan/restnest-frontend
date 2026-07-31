@@ -95,13 +95,13 @@
   --chart-5: oklch(0.6 0.1 300);
 
   /* Sidebar */
-  --sidebar: oklch(0.21 0.02 255);
-  --sidebar-foreground: oklch(0.98 0.01 240);
+  --sidebar: oklch(1 0 0); /* Changed from dark to white */
+  --sidebar-foreground: oklch(0.21 0.02 255); /* Dark text */
   --sidebar-primary: oklch(0.45 0.16 255);
   --sidebar-primary-foreground: oklch(0.98 0.01 240);
-  --sidebar-accent: oklch(0.3 0.02 255);
-  --sidebar-accent-foreground: oklch(0.98 0.01 240);
-  --sidebar-border: oklch(0.3 0.02 255);
+  --sidebar-accent: oklch(0.96 0.01 240); /* Light grey hover */
+  --sidebar-accent-foreground: oklch(0.21 0.02 255);
+  --sidebar-border: oklch(0.92 0.01 240);
   --sidebar-ring: oklch(0.45 0.16 255);
 }
 

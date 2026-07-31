@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/providers/authProvider";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
@@ -32,8 +33,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             <AuthProvider>
               <Toaster richColors position="top-right" />
-
-              {children}
+              <TooltipProvider>{children}</TooltipProvider>
             </AuthProvider>
           </ReactQueryProvider>
         </ThemeProvider>
