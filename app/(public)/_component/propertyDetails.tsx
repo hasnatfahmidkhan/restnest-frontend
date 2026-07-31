@@ -12,13 +12,13 @@ import {
   BedDouble,
   CalendarDays,
   ImageOff,
-  KeyRound,
   MapPin,
   Maximize,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import PropertyDetailsSkeleton from "./propertyDetailsSkeleton";
+import RentRequestDialog from "./rentRequestDialog";
 
 export default function PropertyDetails({ id }: { id: string }) {
   const { data, isPending, isError } = useProperty(id);
@@ -244,18 +244,18 @@ export default function PropertyDetails({ id }: { id: string }) {
               <Separator />
 
               <div className="space-y-3">
-                <h3 className="font-semibold text-foreground">
-                  Interested in this place?
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Submit a rent request to the landlord to initiate the booking
-                  process for this property.
-                </p>
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-foreground">
+                    Interested in this place?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Submit a rent request to the landlord to initiate the
+                    booking process for this property.
+                  </p>
 
-                {/* Rent Request Button */}
-                <Button className="w-full" size="lg">
-                  <KeyRound className="w-4 h-4 mr-2" /> Send Rent Request
-                </Button>
+                  {/* Replace the old Button with this Dialog Component */}
+                  <RentRequestDialog propertyId={property.id} />
+                </div>
               </div>
             </CardContent>
           </Card>

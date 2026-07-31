@@ -171,7 +171,7 @@ export default function PropertyListings() {
                         <Button
                           size="sm"
                           variant="secondary"
-                          className="transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground"
+                          className="transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground hover:bg-primary cursor-pointer"
                         >
                           View Details
                         </Button>
