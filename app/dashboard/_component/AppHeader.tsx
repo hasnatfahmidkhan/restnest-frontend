@@ -2,7 +2,7 @@
 "use client";
 
 import { ThemeToggler } from "@/components/shared/theme-toggler";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -64,6 +64,12 @@ export default function AppHeader() {
               className="relative h-10 w-10 rounded-full p-0"
             >
               <Avatar className="h-9 w-9 border border-border">
+                {user?.profile?.profilePhoto && (
+                  <AvatarImage
+                    src={user.profile.profilePhoto}
+                    alt={user.name || "User"}
+                  />
+                )}
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                   {getInitials(user?.name)}
                 </AvatarFallback>

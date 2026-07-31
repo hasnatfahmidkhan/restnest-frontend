@@ -1,12 +1,10 @@
 // components/property-filters.tsx
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useTransition } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -15,8 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, SlidersHorizontal } from "lucide-react";
 import { useAmenities, useCategories } from "@/hooks/useProperties";
+import { Search, SlidersHorizontal } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 export default function PropertyFilters() {
   const router = useRouter();
@@ -24,13 +25,15 @@ export default function PropertyFilters() {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+  const { data: categoriesData, isLoading: categoriesLoading } =
+    useCategories();
   const { data: amenitiesData, isLoading: amenitiesLoading } = useAmenities();
 
   const selectedAmenities = searchParams.getAll("amenity");
 
   const updateFilter = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString());
+    console.log(params);
     if (value && value !== "all") {
       params.set(key, value);
     } else {
@@ -40,19 +43,26 @@ export default function PropertyFilters() {
     startTransition(() => router.push(`${pathname}?${params.toString()}`));
   };
 
+  const debouncedUpdateFilter = useDebouncedCallback(
+    (key: string, value?: string) => {
+      updateFilter(key, value);
+    },
+    500,
+  );
+
   const toggleAmenity = (amenityName: string) => {
     const params = new URLSearchParams(searchParams.toString());
     const current = params.getAll("amenity");
-    
+
     params.delete("amenity");
-    
+
     const newAmenities = current.includes(amenityName)
       ? current.filter((a) => a !== amenityName)
       : [...current, amenityName];
-      
+
     newAmenities.forEach((a) => params.append("amenity", a));
     params.delete("page");
-    
+
     startTransition(() => router.push(`${pathname}?${params.toString()}`));
   };
 
@@ -72,7 +82,9 @@ export default function PropertyFilters() {
             id="search"
             placeholder="Title, address..."
             defaultValue={searchParams.get("searchTerm") || ""}
-            onChange={(e) => updateFilter("searchTerm", e.target.value)}
+            onChange={(e) =>
+              debouncedUpdateFilter("searchTerm", e.target.value)
+            }
             className="pl-9"
           />
         </div>
@@ -85,7 +97,7 @@ export default function PropertyFilters() {
           id="city"
           placeholder="e.g. Dhaka"
           defaultValue={searchParams.get("city") || ""}
-          onChange={(e) => updateFilter("city", e.target.value)}
+          onChange={(e) => debouncedUpdateFilter("city", e.target.value)}
         />
       </div>
 
@@ -153,8 +165,12 @@ export default function PropertyFilters() {
               <div key={amenity.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`amenity-${amenity.id}`}
-                  checked={selectedAmenities.includes(amenity.name.toLowerCase())}
-                  onCheckedChange={() => toggleAmenity(amenity.name.toLowerCase())}
+                  checked={selectedAmenities.includes(
+                    amenity.name.toLowerCase(),
+                  )}
+                  onCheckedChange={() =>
+                    toggleAmenity(amenity.name.toLowerCase())
+                  }
                 />
                 <Label
                   htmlFor={`amenity-${amenity.id}`}
@@ -168,9 +184,9 @@ export default function PropertyFilters() {
         )}
       </div>
 
-      <Button 
-        variant="outline" 
-        className="w-full" 
+      <Button
+        variant="outline"
+        className="w-full"
         onClick={() => router.push(pathname)}
         disabled={isPending}
       >
