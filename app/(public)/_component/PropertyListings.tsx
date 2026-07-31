@@ -1,4 +1,3 @@
-// components/property-listings.tsx
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -10,6 +9,7 @@ import { useProperties } from "@/hooks/useProperties";
 import { propertyFilterSchema } from "@/schemas/property.schema";
 import { Bath, BedDouble, ImageOff, MapPin, Maximize } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { ListingsSkeleton } from "./FiltersSkeleton";
 
 export default function PropertyListings() {
@@ -87,81 +87,99 @@ export default function PropertyListings() {
               property.propertyImages?.[0];
 
             return (
-              <Card
+              // Wrapped Card in Link for navigation
+              <Link
                 key={property.id}
-                className="overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col p-0"
+                href={`/properties/${property.id}`}
+                className="group block h-full" // 'group' allows child hover effects
               >
-                {/* Image Section */}
-                <div className="relative w-full h-52 bg-muted overflow-hidden">
-                  {primaryImage ? (
-                    <Image
-                      src={primaryImage.url}
-                      alt={property.title}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
-                      <ImageOff className="w-10 h-10" />
-                      <span className="text-xs">No image available</span>
-                    </div>
-                  )}
-                  {/* Availability Badge over image */}
-                  <Badge
-                    className={`absolute top-3 right-3 ${property.isAvailable ? "bg-primary/90" : "bg-destructive/90"}`}
-                  >
-                    {property.isAvailable ? "Available" : "Unavailable"}
-                  </Badge>
-                </div>
-
-                {/* Content Section */}
-                <CardHeader className="flex-row items-start justify-between space-y-0 p-4 pb-2">
-                  <div>
-                    <CardTitle className="text-lg font-heading mb-1">
-                      {property.title}
-                    </CardTitle>
-                    <div className="flex items-center text-sm text-muted-foreground gap-1">
-                      <MapPin className="w-3 h-3" /> {property.address},{" "}
-                      {property.city}
-                    </div>
+                <Card className="overflow-hidden h-full flex flex-col p-0 border-border/80 transition-all duration-300 ease-in-out group-hover:shadow-xl group-hover:-translate-y-1 group-hover:border-primary/30">
+                  {/* Image Section */}
+                  <div className="relative w-full h-52 bg-muted overflow-hidden">
+                    {primaryImage ? (
+                      <Image
+                        src={primaryImage.url}
+                        alt={property.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
+                        <ImageOff className="w-10 h-10" />
+                        <span className="text-xs">No image available</span>
+                      </div>
+                    )}
+                    {/* Availability Badge over image */}
+                    <Badge
+                      className={`absolute top-3 right-3 ${
+                        property.isAvailable
+                          ? "bg-primary/90"
+                          : "bg-destructive/90"
+                      }`}
+                    >
+                      {property.isAvailable ? "Available" : "Unavailable"}
+                    </Badge>
                   </div>
-                </CardHeader>
 
-                <CardContent className="flex-grow flex flex-col justify-between p-4 pt-2">
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {property.description}
-                  </p>
-
-                  <div className="space-y-4 mt-auto">
-                    <div className="flex items-center justify-between text-sm border-t pt-4">
-                      <div className="flex gap-4 text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <BedDouble className="w-4 h-4" /> {property.bedrooms}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Bath className="w-4 h-4" /> {property.bathrooms}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Maximize className="w-4 h-4" /> {property.area} sqft
-                        </span>
+                  {/* Content Section */}
+                  <CardHeader className="flex-row items-start justify-between space-y-0 p-4 pb-2">
+                    <div>
+                      {/* Micro-interaction: Title changes color on hover */}
+                      <CardTitle className="text-lg font-heading mb-1 transition-colors duration-300 group-hover:text-primary">
+                        {property.title}
+                      </CardTitle>
+                      <div className="flex items-center text-sm text-muted-foreground gap-1">
+                        <MapPin className="w-3 h-3" /> {property.address},{" "}
+                        {property.city}
                       </div>
                     </div>
+                  </CardHeader>
 
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <span className="text-2xl font-bold text-primary">
-                          ${property.rentPrice}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          /month
-                        </span>
+                  <CardContent className="grow flex flex-col justify-between p-4 pt-2">
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                      {property.description}
+                    </p>
+
+                    <div className="space-y-4 mt-auto">
+                      <div className="flex items-center justify-between text-sm border-t pt-4">
+                        <div className="flex gap-4 text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <BedDouble className="w-4 h-4" />{" "}
+                            {property.bedrooms}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Bath className="w-4 h-4" /> {property.bathrooms}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Maximize className="w-4 h-4" /> {property.area}{" "}
+                            sqft
+                          </span>
+                        </div>
                       </div>
-                      <Button size="sm" variant="secondary">
-                        View Details
-                      </Button>
+
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <span className="text-2xl font-bold text-primary">
+                            ${property.rentPrice}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            /month
+                          </span>
+                        </div>
+                        {/* Micro-interaction: Button changes style on hover */}
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground"
+                        >
+                          View Details
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>

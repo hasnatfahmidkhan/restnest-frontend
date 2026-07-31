@@ -10,6 +10,7 @@ const PUBLIC_ROUTES = [
   "/login",
   "/register",
   "/properties",
+  "/properties/:id",
   "/about",
   "/contact",
 ];

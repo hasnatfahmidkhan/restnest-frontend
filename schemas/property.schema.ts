@@ -24,6 +24,13 @@ export type PropertyImage = {
   isPrimary: boolean;
 };
 
+export type PropertyAmenity = {
+  amenity: {
+    name: string;
+    id: string;
+  };
+};
+
 export type Property = {
   id: string;
   title: string;
@@ -40,7 +47,7 @@ export type Property = {
   landlordId: string;
   createdAt: string;
   updatedAt: string;
-  propertyAmenities: string[];
+  propertyAmenities: PropertyAmenity[];
   propertyImages: PropertyImage[];
 };
 
@@ -71,4 +78,10 @@ export type SelectableResponse = {
   success: boolean;
   message: string;
   data: SelectableItem[];
+};
+
+export type SinglePropertyResponse = {
+  success: boolean;
+  message: string;
+  data: Property;
 };
