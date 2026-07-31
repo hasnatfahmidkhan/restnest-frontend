@@ -3,17 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { match } from "path-to-regexp";
 import { jwtUtils } from "./lib/jwt";
-
-const AUTH_ROUTES = ["/login", "/register"];
-const PUBLIC_ROUTES = [
-  "/",
-  "/login",
-  "/register",
-  "/properties",
-  "/properties/:id",
-  "/about",
-  "/contact",
-];
+import { AUTH_ROUTES, PUBLIC_ROUTES } from "./routes";
 
 // 1. Initialize matchers once (Performance Boost)
 const publicMatchers = PUBLIC_ROUTES.map((route) =>

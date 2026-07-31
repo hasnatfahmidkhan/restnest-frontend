@@ -50,7 +50,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/"
+                  href="/how-it-works"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   How it Works
@@ -73,7 +73,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/"
+                  href="/privacy-policy"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   Privacy Policy
@@ -81,7 +81,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/"
+                  href="/terms"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   Terms of Service

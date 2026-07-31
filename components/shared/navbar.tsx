@@ -33,6 +33,8 @@ const ROLE_ROUTES: Record<UserRole, { label: string; href: string }[]> = {
 const PUBLIC_ROUTES = [
   { label: "Home", href: "/" },
   { label: "Properties", href: "/properties" },
+  { label: "About", href: "/about" },
+  { label: "contact", href: "/contact" },
 ];
 
 export function Navbar() {
