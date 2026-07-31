@@ -1,4 +1,3 @@
-import { Container } from "@/components/shared/container";
 import { Footer } from "@/components/shared/footer";
 import { Navbar } from "@/components/shared/navbar";
 
@@ -8,7 +7,7 @@ const PublicLayout = ({
   return (
     <>
       <Navbar />
-      <Container>{children}</Container>
+      {children}
       <Footer />
     </>
   );
