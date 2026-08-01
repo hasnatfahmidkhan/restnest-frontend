@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use server";
 
 import { getNewAccesssToken } from "@/services/getNewAccesssToken";
@@ -96,8 +97,60 @@ export async function saveProperty(
       success: true,
       message: `Property ${isEdit ? "updated" : "created"} successfully!`,
     };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return { error: "An unexpected error occurred." };
+  }
+}
+
+export async function deleteProperty(
+  propertyId: string,
+): Promise<{ success: boolean; message?: string }> {
+  // Auth & Token Logic
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  let tokenToUse: string | undefined = undefined;
+
+  if (accessToken) {
+    tokenToUse = accessToken;
+  }
+
+  if (!tokenToUse) {
+    const refreshResult = await getNewAccesssToken();
+    if (!refreshResult?.success || !refreshResult.data?.accessToken) {
+      return { success: false, message: "Unauthorized. Please log in again." };
+    }
+    tokenToUse = refreshResult.data.accessToken;
+  }
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/landlord/properties/${propertyId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${tokenToUse}`,
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (res.status === 401 || res.status === 403) {
+      return {
+        success: false,
+        message: "Session expired. Please log in again.",
+      };
+    }
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      return {
+        success: false,
+        message: errorData?.message || "Failed to delete property",
+      };
+    }
+
+    return { success: true, message: "Property deleted successfully!" };
+  } catch (error) {
+    return { success: false, message: "An unexpected error occurred." };
   }
 }

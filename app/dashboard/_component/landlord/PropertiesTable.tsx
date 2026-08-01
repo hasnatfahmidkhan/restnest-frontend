@@ -1,9 +1,20 @@
+// components/dashboard/landlord/properties-table.tsx
 "use client";
 
-import DeleteDialog from "@/components/shared/DeleteDialog";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useDebouncedCallback } from "use-debounce"; // Import debounce
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -13,10 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useProperties } from "@/hooks/useProperties";
-import { Property } from "@/schemas/property.schema";
-
-import { useAuthStore } from "@/store/auth-store";
 import {
   ChevronLeft,
   ChevronRight,
@@ -25,12 +32,20 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+
+import DeleteDialog from "@/components/shared/DeleteDialog";
+import { useProperties } from "@/hooks/useProperties";
+import { Property } from "@/schemas/property.schema";
+import { useAuthStore } from "@/store/auth-store";
+import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { deleteProperty } from "../../_actions/property.actions";
 
 export default function PropertiesTable() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const user = useAuthStore((state) => state.user);
@@ -45,6 +60,12 @@ export default function PropertiesTable() {
     page: Number(searchParams.get("page")) || 1,
     limit: Number(searchParams.get("limit")) || 5,
     searchTerm: searchParams.get("searchTerm") || "",
+    sortBy:
+      (searchParams.get("sortBy") as
+        | "createdAt"
+        | "rentPrice"
+        | "averageRating") || "createdAt",
+    sortOrder: (searchParams.get("sortOrder") as "asc" | "desc") || "desc",
   };
 
   const { data, isPending, isError } = useProperties(filters);
@@ -57,14 +78,23 @@ export default function PropertiesTable() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // DEBOUNCE: Wrapped the search function with useDebouncedCallback (500ms delay)
+  const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (e.target.value) {
-      params.set("searchTerm", e.target.value);
+    if (term) {
+      params.set("searchTerm", term);
     } else {
       params.delete("searchTerm");
     }
-    params.delete("page");
+    params.delete("page"); // Reset to page 1 on new search
+    router.push(`${pathname}?${params.toString()}`);
+  }, 500);
+
+  // Handle Sort changes
+  const handleSortChange = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(key, value);
+    params.delete("page"); // Reset to page 1 on sort change
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -75,6 +105,7 @@ export default function PropertiesTable() {
 
   return (
     <div className="space-y-6">
+      {/* Controls Area */}
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div className="relative w-full md:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -82,17 +113,48 @@ export default function PropertiesTable() {
             placeholder="Search properties..."
             className="pl-9"
             defaultValue={filters.searchTerm}
-            onChange={handleSearch}
+            onChange={(e) => handleSearch(e.target.value)} // Call debounced function
           />
         </div>
-        {/* Updated Create Button to route to the new page */}
-        <Link href="/dashboard/landlord/properties/create">
-          <Button className="w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" /> Create Property
-          </Button>
-        </Link>
+
+        {/* Sort & Create Button */}
+        <div className="flex items-center gap-3">
+          <Select
+            defaultValue={filters.sortBy}
+            onValueChange={(val) => handleSortChange("sortBy", val)}
+          >
+            <SelectTrigger className="w-35">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="createdAt">Newest</SelectItem>
+              <SelectItem value="rentPrice">Rent Price</SelectItem>
+              <SelectItem value="averageRating">Rating</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            defaultValue={filters.sortOrder}
+            onValueChange={(val) => handleSortChange("sortOrder", val)}
+          >
+            <SelectTrigger className="w-27.5">
+              <SelectValue placeholder="Order" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Descending</SelectItem>
+              <SelectItem value="asc">Ascending</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Link href="/dashboard/landlord/properties/create">
+            <Button className="w-full md:w-auto">
+              <Plus className="w-4 h-4 mr-2" /> Create Property
+            </Button>
+          </Link>
+        </div>
       </div>
 
+      {/* Table Area */}
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
@@ -137,12 +199,13 @@ export default function PropertiesTable() {
                 <TableRow key={property.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-md bg-muted overflow-hidden flex-shrink-0">
+                      <div className="relative w-12 h-12 rounded-md bg-muted overflow-hidden shrink-0">
                         {property.propertyImages?.[0] && (
-                          <img
+                          <Image
+                            fill
                             src={property.propertyImages[0].url}
                             alt={property.title}
-                            className="w-full h-full object-cover"
+                            className="object-cover"
                           />
                         )}
                       </div>
@@ -172,7 +235,6 @@ export default function PropertiesTable() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      {/* Updated Edit Button to route to the edit page */}
                       <Link
                         href={`/dashboard/landlord/properties/${property.id}/edit`}
                       >
@@ -228,12 +290,17 @@ export default function PropertiesTable() {
         </div>
       )}
 
+      {/* Delete Dialog */}
       <DeleteDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         itemData={selectedProperty}
         itemName={selectedProperty?.title}
         entityType="Property"
+        onDeleteAction={deleteProperty} // Pass the server action
+        onSuccess={() =>
+          queryClient.invalidateQueries({ queryKey: ["properties"] })
+        }
       />
     </div>
   );

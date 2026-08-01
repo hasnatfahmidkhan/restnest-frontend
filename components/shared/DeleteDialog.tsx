@@ -19,7 +19,11 @@ interface DeleteDialogProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   itemData: any;
   itemName?: string;
-  entityType: string; // e.g., "Property", "User"
+  entityType: string;
+  onDeleteAction: (
+    id: string,
+  ) => Promise<{ success: boolean; message?: string }>;
+  onSuccess?: () => void; // Callback to refresh data
 }
 
 export default function DeleteDialog({
@@ -28,20 +32,26 @@ export default function DeleteDialog({
   itemData,
   itemName,
   entityType,
+  onDeleteAction,
+  onSuccess,
 }: DeleteDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
+    if (!itemData?.id) return;
+
     setIsDeleting(true);
+    const result = await onDeleteAction(itemData.id);
 
-    // MOCK API CALL - Replace with actual backend call later
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    console.log(`Deleted ${entityType}:`, itemData.id);
-    toast.success(`${entityType} deleted successfully!`);
+    if (result.success) {
+      toast.success(result.message || `${entityType} deleted successfully!`);
+      onSuccess?.(); // Trigger table refresh
+      onOpenChange(false); // Close dialog
+    } else {
+      toast.error(result.message || `Failed to delete ${entityType}`);
+    }
 
     setIsDeleting(false);
-    onOpenChange(false);
   };
 
   return (
