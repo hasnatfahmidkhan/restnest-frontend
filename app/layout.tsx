@@ -2,9 +2,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/providers/authProvider";
+import { LenisProvider } from "@/providers/LenisProvider";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
 import { ThemeProvider } from "@/providers/theme-provider";
-import { LenisProvider } from "@/providers/LenisProvider";
 import { Geist, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -34,7 +34,7 @@ export default function RootLayout({
           >
             <ReactQueryProvider>
               <AuthProvider>
-                <Toaster richColors position="top-right" />
+                <Toaster richColors position="top-right" closeButton />
                 <TooltipProvider>{children}</TooltipProvider>
               </AuthProvider>
             </ReactQueryProvider>

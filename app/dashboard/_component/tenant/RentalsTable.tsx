@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCreatePaymentSession } from "@/hooks/useCreatePaymentSession";
 import {
   TenantRental,
   TenantRentalStatus,
@@ -80,12 +81,13 @@ const getStatusBadge = (status: TenantRentalStatus) => {
 export default function TenantRentalsTable() {
   const { data, isPending, isError } = useTenantRentals();
   const { mutate: cancelRental, isPending: isCanceling } = useCancelRental();
+  const { mutate: createPayment } = useCreatePaymentSession();
 
   const rentals = data?.data || [];
 
   // Mock actions for Pay Now and Leave Review (will be implemented later)
-  const handlePayNow = (id: string) =>
-    toast.info("Redirecting to payment gateway...");
+  const handlePayNow = (id: string) => createPayment(id);
+
   const handleReview = (id: string) => toast.info("Opening review form...");
 
   const handleCancel = (id: string) => cancelRental(id);
