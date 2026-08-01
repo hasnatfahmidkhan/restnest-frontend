@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/providers/authProvider";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { LenisProvider } from "@/providers/LenisProvider";
 import { Geist, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -24,19 +25,21 @@ export default function RootLayout({
       className={cn(geist.variable, jakarta.variable, "font-sans")}
     >
       <body className="min-h-screen flex flex-col bg-background text-foreground">
-        <ThemeProvider
-          attribute={"class"}
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ReactQueryProvider>
-            <AuthProvider>
-              <Toaster richColors position="top-right" />
-              <TooltipProvider>{children}</TooltipProvider>
-            </AuthProvider>
-          </ReactQueryProvider>
-        </ThemeProvider>
+        <LenisProvider>
+          <ThemeProvider
+            attribute={"class"}
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ReactQueryProvider>
+              <AuthProvider>
+                <Toaster richColors position="top-right" />
+                <TooltipProvider>{children}</TooltipProvider>
+              </AuthProvider>
+            </ReactQueryProvider>
+          </ThemeProvider>
+        </LenisProvider>
       </body>
     </html>
   );
