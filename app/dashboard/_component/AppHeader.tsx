@@ -1,4 +1,3 @@
-// components/dashboard/app-header.tsx
 "use client";
 
 import { ThemeToggler } from "@/components/shared/theme-toggler";
@@ -13,21 +12,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useLogout } from "@/hooks/auth.hooks";
 import { useAuthStore } from "@/store/auth-store";
 import { Home, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function AppHeader() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const clearUser = useAuthStore((state) => state.logout);
+  const { logout } = useLogout();
+  const pathname = usePathname();
 
   const handleLogout = () => {
+    logout();
     if (clearUser) clearUser();
-    toast.success("Logged out successfully");
-    router.push("/login");
+
+    router.push(`/login?redirectTo=${pathname}`);
   };
 
   const getInitials = (name?: string | null) => {

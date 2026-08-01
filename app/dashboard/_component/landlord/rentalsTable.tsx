@@ -131,7 +131,7 @@ export default function RentalsTable() {
               <TableRow key={rental.id}>
                 <TableCell>
                   <Link
-                    href={`/dashboard/landlord/requests/${rental.id}?tenantId=${rental.tenant.id}`}
+                    href={`/dashboard/requests/${rental.id}?tenantId=${rental.tenant.id}`}
                   >
                     <p className="font-medium text-foreground hover:text-primary hover:underline cursor-pointer">
                       {rental.property.title}
