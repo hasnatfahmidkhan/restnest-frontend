@@ -18,6 +18,7 @@ import {
   Home,
   LayoutDashboard,
   Settings,
+  Star,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -49,6 +50,11 @@ export default function AppSidebar() {
       title: "My Rentals",
       url: `${baseUrl}/rentals`,
       icon: FileText,
+    });
+    navItems.push({
+      title: "My Reviews",
+      url: `${baseUrl}/reviews`,
+      icon: Star,
     });
   } else if (user?.role === "LANDLORD") {
     navItems.push({
