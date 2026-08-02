@@ -14,9 +14,11 @@ import {
 import { useAuthStore } from "@/store/auth-store";
 import {
   Building,
+  CreditCard,
   FileText,
   Home,
   LayoutDashboard,
+  Receipt,
   Settings,
   Star,
   Users,
@@ -55,6 +57,11 @@ export default function AppSidebar() {
       title: "My Reviews",
       url: `${baseUrl}/reviews`,
       icon: Star,
+    });
+    navItems.push({
+      title: "Payment History",
+      url: `${baseUrl}/payment-history`,
+      icon: CreditCard,
     });
   } else if (user?.role === "LANDLORD") {
     navItems.push({

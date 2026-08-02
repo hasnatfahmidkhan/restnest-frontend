@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCreatePaymentSession } from "@/hooks/useCreatePaymentSession";
+import { useCreatePaymentSession } from "@/hooks/usePayment";
 import {
   TenantRental,
   TenantRentalStatus,

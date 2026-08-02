@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const useCreatePaymentSession = () => {
@@ -35,6 +35,38 @@ export const useCreatePaymentSession = () => {
     onError: (error: Error) => {
       console.log(error);
       toast.error(error.message);
+    },
+  });
+};
+
+export type PaymentHistoryItem = {
+  id: string;
+  amount: string;
+  status: string;
+  paidAt: string;
+  transactionId: string;
+  sessionId: string;
+  rentalRequestId: string;
+  rentalRequest: {
+    status: string;
+    moveInDate: string;
+    endDate: string;
+    property: {
+      title: string;
+      propertyImages: { url: string }[];
+    };
+  };
+};
+
+export const usePaymentHistory = () => {
+  return useQuery<{ success: boolean; data: PaymentHistoryItem[] }>({
+    queryKey: ["payment-history"],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments`, {
+        credentials: "include", // Send httpOnly cookies
+      });
+      if (!res.ok) throw new Error("Failed to fetch payment history");
+      return res.json();
     },
   });
 };
