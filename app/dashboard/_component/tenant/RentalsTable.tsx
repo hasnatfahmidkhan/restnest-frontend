@@ -22,7 +22,8 @@ import {
 import { Ban, CreditCard, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { toast } from "sonner";
+import { useState } from "react";
+import ReviewDialog from "./ReviewDialog";
 
 // Helper to get badge styles based on status
 const getStatusBadge = (status: TenantRentalStatus) => {
@@ -82,13 +83,20 @@ export default function TenantRentalsTable() {
   const { data, isPending, isError } = useTenantRentals();
   const { mutate: cancelRental, isPending: isCanceling } = useCancelRental();
   const { mutate: createPayment } = useCreatePaymentSession();
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [selectedRental, setSelectedRental] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const rentals = data?.data || [];
 
-  // Mock actions for Pay Now and Leave Review (will be implemented later)
   const handlePayNow = (id: string) => createPayment(id);
 
-  const handleReview = (id: string) => toast.info("Opening review form...");
+  const handleReview = (rental: TenantRental) => {
+    setSelectedRental({ id: rental.id, title: rental.property.title });
+    setIsReviewOpen(true);
+  };
 
   const handleCancel = (id: string) => cancelRental(id);
 
@@ -201,18 +209,18 @@ export default function TenantRentalsTable() {
                     )}
 
                     {/* ACTIVE: Shows Leave Review */}
-                    {rental.status === "ACTIVE" && (
+                    {rental.status === "COMPLETED" && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleReview(rental.id)}
+                        onClick={() => handleReview(rental)}
                       >
                         <Star className="w-4 h-4 mr-1" /> Leave Review
                       </Button>
                     )}
 
                     {/* REJECTED, COMPLETED, CANCELED: No action */}
-                    {!["PENDING", "APPROVED", "ACTIVE"].includes(
+                    {!["REJECTED", "COMPLETED", "CANCELED"].includes(
                       rental.status,
                     ) && (
                       <span className="text-xs text-muted-foreground italic">
@@ -226,6 +234,14 @@ export default function TenantRentalsTable() {
           )}
         </TableBody>
       </Table>
+      {selectedRental && (
+        <ReviewDialog
+          open={isReviewOpen}
+          onOpenChange={setIsReviewOpen}
+          rentalId={selectedRental.id}
+          propertyTitle={selectedRental.title}
+        />
+      )}
     </div>
   );
 }
