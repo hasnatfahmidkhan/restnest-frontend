@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   Settings,
   Star,
+  Store,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -83,6 +84,11 @@ export default function AppSidebar() {
       title: "Manage Properties",
       url: `${baseUrl}/properties`,
       icon: Building,
+    });
+    navItems.push({
+      title: "Manage Rentals",
+      url: `${baseUrl}/rentals`,
+      icon: Store,
     });
   }
 

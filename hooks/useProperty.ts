@@ -14,7 +14,7 @@ export const useProperty = (id: string) => {
     queryKey: ["property", id],
     queryFn: async () => {
       const res = await fetch(`${API_BASE_URL}/${url}`, {
-        credentials: "include", // Sends httpOnly cookies automatically
+        credentials: "include", 
         headers: {
           "Content-Type": "application/json",
         },
