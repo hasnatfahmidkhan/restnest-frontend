@@ -1,20 +1,24 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/auth.hooks";
 import { cn } from "@/lib/utils";
-import {
-  ChevronDown,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  User,
-} from "lucide-react";
+import { ChevronDown, Home, LayoutDashboard, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { DropdownMenu } from "radix-ui";
 
 interface UserDropdownProps {
   email: string;
   role: "TENANT" | "LANDLORD" | "ADMIN";
+  profilePhoto?: string; // Added optional profilePhoto prop
 }
 
 const ROLE_BADGE: Record<string, string> = {
@@ -29,90 +33,94 @@ const ROLE_DASHBOARD: Record<string, string> = {
   ADMIN: "/dashboard/admin",
 };
 
-export function UserDropdown({ email, role }: UserDropdownProps) {
+export function UserDropdown({ email, role, profilePhoto }: UserDropdownProps) {
   const initial = email.charAt(0).toUpperCase();
   const displayName = email.split("@")[0];
   const dashboardHref = ROLE_DASHBOARD[role];
 
   const { logout } = useLogout();
 
-  const handleLogout = () => {
-    logout();
-  };
-
   return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <button
-          type="button"
-          aria-label="Open user menu"
-          className="group flex items-center gap-1.5 rounded-full border border-border/60 bg-background py-1 pl-1 pr-2 transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="group relative h-10 w-auto rounded-full border border-border/60 p-1 pr-2 gap-1.5 cursor-pointer"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase text-primary-foreground">
-            {initial}
-          </span>
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-        </button>
-      </DropdownMenu.Trigger>
+          <Avatar className="h-8 w-8 border border-border/60">
+            {profilePhoto && (
+              <AvatarImage src={profilePhoto} alt={displayName} />
+            )}
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs uppercase">
+              {initial}
+            </AvatarFallback>
+          </Avatar>
 
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          sideOffset={8}
-          align="end"
-          className={cn(
-            "z-50 min-w-[16rem] overflow-hidden rounded-xl border border-border bg-popover p-1.5 shadow-lg shadow-black/5",
-            "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-top-2",
-            "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-          )}
-        >
-          {/* User info header */}
-          <div className="mb-1 border-b border-border/60 px-3 py-2.5">
-            <p className="truncate text-sm font-medium capitalize">
+          {/* Chevron Icon with Flip Animation */}
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" className="w-56">
+        {/* User info header */}
+        <DropdownMenuLabel>
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none capitalize">
               {displayName}
             </p>
-            <p className="truncate text-xs text-muted-foreground">{email}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {email}
+            </p>
             <span
               className={cn(
-                "mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                "mt-1.5 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
                 ROLE_BADGE[role],
               )}
             >
               {role}
             </span>
           </div>
+        </DropdownMenuLabel>
 
-          {/* Items */}
-          <DropdownMenu.Item asChild>
-            <Link
-              href={dashboardHref}
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm text-foreground/90 outline-none transition-colors hover:bg-accent data-highlighted:bg-accent"
-            >
-              <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
-              Dashboard
-            </Link>
-          </DropdownMenu.Item>
+        <DropdownMenuSeparator />
 
-          <DropdownMenu.Item className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm text-foreground/90 outline-none transition-colors hover:bg-accent data-highlighted:bg-accent">
-            <User className="h-4 w-4 text-muted-foreground" />
-            Profile
-          </DropdownMenu.Item>
+        <DropdownMenuItem asChild>
+          <Link href="/" className="cursor-pointer flex items-center">
+            <Home className="mr-2 h-4 w-4" />
+            <span>Home</span>
+          </Link>
+        </DropdownMenuItem>
 
-          <DropdownMenu.Item className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm text-foreground/90 outline-none transition-colors hover:bg-accent data-highlighted:bg-accent">
-            <Settings className="h-4 w-4 text-muted-foreground" />
-            Settings
-          </DropdownMenu.Item>
-
-          <DropdownMenu.Separator className="my-1 h-px bg-border/60" />
-
-          <DropdownMenu.Item
-            onClick={handleLogout}
-            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm text-destructive outline-none transition-colors hover:bg-destructive/10 data-highlighted:bg-destructive/10"
+        <DropdownMenuItem asChild>
+          <Link
+            href={dashboardHref}
+            className="cursor-pointer flex items-center"
           >
-            <LogOut className="h-4 w-4" />
-            Log out
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/dashboard/${role.toLowerCase()}/profile`}
+            className="cursor-pointer flex items-center"
+          >
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          onClick={() => logout()}
+          className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Logout</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

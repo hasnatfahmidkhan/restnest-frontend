@@ -14,7 +14,7 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useLogout } from "@/hooks/auth.hooks";
 import { useAuthStore } from "@/store/auth-store";
-import { Home, LogOut, User } from "lucide-react";
+import { ChevronDown, Home, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -63,21 +63,25 @@ export default function AppHeader() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="relative h-10 w-10 rounded-full p-0"
+              className="group relative h-10 w-auto rounded-full p-1 pr-2 gap-1 cursor-pointer"
             >
-              <Avatar className="h-9 w-9 border border-border">
+              <Avatar className="h-8 w-8 border border-border">
                 {user?.profile?.profilePhoto && (
                   <AvatarImage
                     src={user.profile.profilePhoto}
                     alt={user.name || "User"}
                   />
                 )}
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {getInitials(user?.name)}
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                  {getInitials(user?.email)}
                 </AvatarFallback>
               </Avatar>
+
+              {/* Dropdown Icon with Flip Animation */}
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
@@ -92,13 +96,16 @@ export default function AppHeader() {
                 </span>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem asChild>
               <Link href="/" className="cursor-pointer flex items-center">
                 <Home className="mr-2 h-4 w-4" />
                 <span>Home</span>
               </Link>
             </DropdownMenuItem>
+
             <DropdownMenuItem asChild>
               <Link
                 href={`/dashboard/${user?.role.toLowerCase()}/profile`}
@@ -108,7 +115,9 @@ export default function AppHeader() {
                 <span>Profile</span>
               </Link>
             </DropdownMenuItem>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={handleLogout}
               className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"

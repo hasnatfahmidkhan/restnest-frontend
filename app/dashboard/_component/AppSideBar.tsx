@@ -18,7 +18,6 @@ import {
   FileText,
   Home,
   LayoutDashboard,
-  Receipt,
   Settings,
   Star,
   Users,
