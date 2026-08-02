@@ -154,7 +154,7 @@ export default function TenantRentalsTable() {
                     </div>
                     <div>
                       {/* Updated Link to /dashboard/requests/:id */}
-                      <Link href={`/dashboard/requests/${rental.id}`}>
+                      <Link href={`/dashboard/requests/${rental.id}?tenantId=${rental.tenant.id}`}>
                         <p className="font-medium text-foreground hover:text-primary hover:underline cursor-pointer">
                           {rental.property.title}
                         </p>

@@ -91,7 +91,8 @@ export const useRentalDetails = (rentalId: string, tenantId: string) => {
       });
 
       if (!res.ok) throw new Error("Failed to fetch rental details");
-      return res.json();
+
+      return await res.json();
     },
     enabled: !!rentalId && !!tenantId, // Only run if both IDs exist
   });

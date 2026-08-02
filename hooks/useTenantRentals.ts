@@ -16,6 +16,11 @@ export type TenantRental = {
   leaseMonths: number;
   endDate: string;
   createdAt: string;
+  tenant: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
   property: {
     id: string;
     title: string;

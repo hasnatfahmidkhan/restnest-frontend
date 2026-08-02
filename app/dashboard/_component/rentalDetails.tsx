@@ -1,11 +1,13 @@
-// components/dashboard/landlord/rental-details.tsx
 "use client";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRentalDetails } from "@/hooks/useLandlordRentals";
+import {
+  useRentalDetails,
+  useUpdateRentalStatus,
+} from "@/hooks/useLandlordRentals";
 import {
   ArrowLeft,
   CalendarDays,
@@ -18,7 +20,6 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
-import { toast } from "sonner";
 
 export default function RentalDetails({
   params,
@@ -29,9 +30,26 @@ export default function RentalDetails({
   const searchParams = useSearchParams();
   const tenantId = searchParams.get("tenantId") || "";
   const router = useRouter();
-  const { data, isPending, isError } = useRentalDetails(id, tenantId);
- 
 
+  const { data, isPending, isError } = useRentalDetails(id, tenantId);
+  const {
+    mutate: updateStatus,
+    isPending: isUpdating,
+    isSuccess,
+  } = useUpdateRentalStatus();
+
+  const handleApprove = (id: string) => {
+    updateStatus({ rentalId: id, status: "APPROVED" });
+    if (isSuccess) {
+      router.push("/dashboard/requests");
+    }
+  };
+  const handleReject = (id: string) => {
+    updateStatus({ rentalId: id, status: "REJECTED" });
+    if (isSuccess) {
+      router.push("/dashboard/requests");
+    }
+  };
   if (isPending) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto">
@@ -191,17 +209,19 @@ export default function RentalDetails({
           <Button
             variant="outline"
             className="text-red-600 border-red-600/30 hover:bg-red-600/10"
-            onClick={() => toast.error("Request Rejected")}
+            onClick={() => handleReject(rental.id)}
+            disabled={isUpdating}
           >
-            <X className="w-4 h-4 mr-2" /> Reject Request
+            <X className="w-4 h-4 mr-2" />{" "}
+            {isUpdating ? "Updating Status" : "Reject Request"}
           </Button>
           <Button
             className="bg-green-600 hover:bg-green-700"
-            onClick={() =>
-              toast.success("Request Approved! Tenant can now pay.")
-            }
+            onClick={() => handleApprove(rental.id)}
+            disabled={isUpdating}
           >
-            <Check className="w-4 h-4 mr-2" /> Approve Request
+            <Check className="w-4 h-4 mr-2" />
+            {isUpdating ? "Updating Status" : "Approve Request"}
           </Button>
         </div>
       )}

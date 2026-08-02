@@ -1,4 +1,4 @@
-import RentalDetails from "@/app/dashboard/_component/landlord/rentalDetails";
+import RentalDetails from "@/app/dashboard/_component/rentalDetails";
 import { Suspense } from "react";
 
 export default async function RentalDetailsPage({
