@@ -14,7 +14,8 @@ import {
   Home,
 } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export type PaymentDetails = {
   id: string;
@@ -36,6 +37,12 @@ export type PaymentDetails = {
 export default function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const router = useRouter();
+  useEffect(() => {
+    if (!sessionId) {
+      router.replace("/");
+    }
+  }, [sessionId, router]);
 
   const { data, isPending, isError } = useQuery<{
     success: boolean;
@@ -49,6 +56,14 @@ export default function SuccessContent() {
     },
     enabled: !!sessionId,
   });
+
+  if (!sessionId) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (isPending) {
     return (
