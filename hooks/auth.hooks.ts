@@ -90,7 +90,7 @@ export const useRegister = () => {
       // 1. First, register the user
       await registerService(payload);
 
-      // 2. If registration succeeds, automatically login to get the HTTP-only cookies
+      // 2. If registration succeeds, automatically login to get tokens set as cookies
       const { email, password } = payload;
       return await loginService({ email, password });
     },

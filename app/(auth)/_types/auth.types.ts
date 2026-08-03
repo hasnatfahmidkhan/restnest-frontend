@@ -14,6 +14,18 @@ export interface IUser {
   };
 }
 
+// Raw response from the backend (used only in server actions)
+export interface ILoginResponseRaw {
+  success: boolean;
+  message: string;
+  data: {
+    userData: IUser;
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
+// Safe response returned to the client (tokens stripped)
 export interface ILoginResponse {
   success: boolean;
   message: string;
