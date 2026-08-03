@@ -62,7 +62,7 @@ export function Navbar() {
             <Home className="h-5 w-5" strokeWidth={2.4} />
           </span>
           <span className="text-xl font-semibold tracking-tight">
-            Rent<span className="text-primary">Nest</span>
+            Rest<span className="text-primary">Nest</span>
           </span>
         </Link>
 

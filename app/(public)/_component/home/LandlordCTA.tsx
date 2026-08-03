@@ -1,12 +1,27 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useLogout } from "@/hooks/auth.hooks";
+import { useAuthStore } from "@/store/auth-store";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 export default function LandlordCTA() {
-  const btnRef = useRef<HTMLAnchorElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const { user, logout: clearUser } = useAuthStore();
+  const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!btnRef.current) return;
@@ -19,6 +34,32 @@ export default function LandlordCTA() {
   const handleMouseLeave = () => {
     if (!btnRef.current) return;
     btnRef.current.style.transform = "translate(0px, 0px)";
+  };
+
+  const handleClick = () => {
+    if (user?.role === "LANDLORD") {
+      router.push("/dashboard/landlord/properties");
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
+  const { logout } = useLogout();
+
+  const handleLoginAsLandlord = async () => {
+    try {
+      // 1. Clear local client state first
+      clearUser();
+
+      // 2. Wait for the backend/auth provider to invalidate the session/cookies
+      await logout();
+
+      // 3. Redirect only after successful logout
+      router.push("/login?redirectTo=/dashboard/landlord/properties");
+    } catch (error) {
+      console.error("Failed to switch account:", error);
+      toast.error("Failed to switch account");
+    }
   };
 
   return (
@@ -52,16 +93,37 @@ export default function LandlordCTA() {
           onMouseLeave={handleMouseLeave}
           className="inline-block"
         >
-          <Link
+          {/* Changed from Link to button to handle conditional routing/modals */}
+          <button
             ref={btnRef}
-            href="/dashboard/landlord/properties"
+            onClick={handleClick}
             className="relative inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-8 py-4 rounded-full shadow-lg transition-colors hover:bg-primary/90"
             style={{ transition: "transform 0.2s ease-out" }}
           >
             List Your Property <ArrowRight className="w-5 h-5" />
-          </Link>
+          </button>
         </motion.div>
       </div>
+
+      {/* Landlord Access Required Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-106.25">
+          <DialogHeader>
+            <DialogTitle>Landlord Access Required</DialogTitle>
+            <DialogDescription>
+              You need to be logged in as a landlord to list properties. Please
+              log in with a landlord account or register as one to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 flex gap-2">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+
+            <Button onClick={handleLoginAsLandlord}>Login as Landlord</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

@@ -96,7 +96,7 @@ export function RegisterForm() {
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
-          Join RentNest today to find or list properties.
+          Join RestNest today to find or list properties.
         </CardDescription>
       </CardHeader>
       <CardContent>

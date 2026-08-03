@@ -101,7 +101,7 @@ export const useRegister = () => {
       setUser(userData);
 
       toast.success("Account created successfully!", {
-        description: `Welcome to RentNest.`,
+        description: `Welcome to RestNest.`,
       });
 
       // 5. Redirect to their role-based dashboard

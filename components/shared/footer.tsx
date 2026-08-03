@@ -17,11 +17,11 @@ export function Footer() {
                 <Home className="h-5 w-5" strokeWidth={2.4} />
               </span>
               <span className="text-xl font-semibold tracking-tight">
-                Rent<span className="text-primary">Nest</span>
+                Rest<span className="text-primary">Nest</span>
               </span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Find your next home or list your property with ease. RentNest
+              Find your next home or list your property with ease. RestNest
               connects tenants and landlords seamlessly.
             </p>
           </div>
@@ -131,7 +131,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-10 border-t border-border/60 pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            © {currentYear} RentNest. All rights reserved.
+            © {currentYear} RestNest. All rights reserved.
           </p>
         </div>
       </Container>
