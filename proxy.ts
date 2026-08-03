@@ -22,7 +22,9 @@ export async function proxy(request: NextRequest) {
   }
 
   let accessToken = request.cookies.get("accessToken")?.value;
+  console.log("accesToken", accessToken);
   const refreshToken = request.cookies.get("refreshToken")?.value;
+  console.log("refresh token", refreshToken);
 
   let decodedAccessToken = accessToken
     ? jwtUtils.verifyJWTToken(accessToken, process.env.JWT_ACCESS_SECRET!)
@@ -61,6 +63,8 @@ export async function proxy(request: NextRequest) {
           path: "/",
         });
 
+        console.log("new access token set");
+
         accessToken = newAccessToken;
         decodedAccessToken = jwtUtils.verifyJWTToken(
           accessToken,
@@ -77,8 +81,9 @@ export async function proxy(request: NextRequest) {
   // 3. Invalid Token Cleanup
   if (!decodedAccessToken?.success) {
     // Delete from response if token is missing or invalid
-    response.cookies.delete("accessToken");
-    accessToken = undefined;
+    // response.cookies.delete("accessToken");
+    // accessToken = undefined;
+    console.log("after delete token");
   } else if (decodedAccessToken.verifiedToken) {
     userRole = (decodedAccessToken.verifiedToken as JwtPayload).role || null;
   }
