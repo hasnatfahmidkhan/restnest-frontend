@@ -2,8 +2,7 @@
 import { TLoginInput, TRegisterInput } from "../_schemas/auth.schema";
 import { ILoginResponse, IUser } from "../_types/auth.types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
 export async function loginService(
   payload: TLoginInput,

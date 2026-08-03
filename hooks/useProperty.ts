@@ -2,8 +2,7 @@ import { SinglePropertyResponse } from "@/schemas/property.schema";
 import { useAuthStore } from "@/store/auth-store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE_URL =
-  (process.env.NEXT_PUBLIC_API_URL as string) || "http://localhost:5000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
 export const useProperty = (id: string) => {
   const user = useAuthStore((state) => state.user);
@@ -14,7 +13,7 @@ export const useProperty = (id: string) => {
     queryKey: ["property", id],
     queryFn: async () => {
       const res = await fetch(`${API_BASE_URL}/${url}`, {
-        credentials: "include", 
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -30,8 +29,14 @@ export const useSaveProperty = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async ({ propertyId, payload }: { propertyId: string | null; payload: any }) => {
+    mutationFn: async ({
+      propertyId,
+      payload,
+    }: {
+      propertyId: string | null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      payload: any;
+    }) => {
       const isEdit = !!propertyId;
       const endpoint = isEdit
         ? `${API_BASE_URL}/landlord/properties/${propertyId}`
@@ -48,7 +53,10 @@ export const useSaveProperty = () => {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.message || `Failed to ${isEdit ? "update" : "create"} property`);
+        throw new Error(
+          errorData?.message ||
+            `Failed to ${isEdit ? "update" : "create"} property`,
+        );
       }
 
       return res.json();
@@ -56,7 +64,9 @@ export const useSaveProperty = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
       if (variables.propertyId) {
-        queryClient.invalidateQueries({ queryKey: ["property", variables.propertyId] });
+        queryClient.invalidateQueries({
+          queryKey: ["property", variables.propertyId],
+        });
       }
     },
   });
@@ -67,10 +77,13 @@ export const useDeleteProperty = () => {
 
   return useMutation({
     mutationFn: async (propertyId: string) => {
-      const res = await fetch(`${API_BASE_URL}/landlord/properties/${propertyId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/landlord/properties/${propertyId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);

@@ -5,8 +5,7 @@ import {
 } from "@/schemas/property.schema";
 import { useQuery } from "@tanstack/react-query";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
 export const useProperties = (filters: PropertyFilterValues) => {
   return useQuery<PropertyResponse>({
