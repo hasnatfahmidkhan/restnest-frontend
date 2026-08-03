@@ -34,13 +34,12 @@ import {
 
 import DeleteDialog from "@/components/shared/DeleteDialog";
 import { useProperties } from "@/hooks/useProperties";
+import { useDeleteProperty } from "@/hooks/useProperty";
 import { Property } from "@/schemas/property.schema";
 import { useAuthStore } from "@/store/auth-store";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { deleteProperty } from "../../_actions/property.actions";
-
 export default function PropertiesTable() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -48,6 +47,7 @@ export default function PropertiesTable() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const user = useAuthStore((state) => state.user);
+  const { mutateAsync: deletePropertyMutate } = useDeleteProperty();
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
@@ -225,9 +225,12 @@ export default function PropertiesTable() {
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">
+                        <Link
+                          href={`/properties/${property.id}`}
+                          className="font-medium text-foreground hover:text-primary"
+                        >
                           {property.title}
-                        </p>
+                        </Link>
                         <p className="text-xs text-muted-foreground">
                           {property.bedrooms} Bed | {property.bathrooms} Bath |{" "}
                           {property.area} sqft
@@ -305,14 +308,21 @@ export default function PropertiesTable() {
         </div>
       )}
 
-      {/* Delete Dialog */}
       <DeleteDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         itemData={selectedProperty}
         itemName={selectedProperty?.title}
         entityType="Property"
-        onDeleteAction={deleteProperty}
+        onDeleteAction={async (id) => {
+          try {
+            await deletePropertyMutate(id);
+            return { success: true };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (error: any) {
+            return { success: false, message: error.message };
+          }
+        }}
         onSuccess={() =>
           queryClient.invalidateQueries({ queryKey: ["properties"] })
         }

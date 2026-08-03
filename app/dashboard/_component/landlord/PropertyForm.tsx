@@ -1,4 +1,3 @@
-// app/dashboard/_component/landlord/PropertyForm.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
 import { useAmenities, useCategories } from "@/hooks/useProperties";
 import { Property } from "@/schemas/property.schema";
 
+import { useSaveProperty } from "@/hooks/useProperty";
 import {
   ArrowLeft,
   ImageOff,
@@ -36,10 +36,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react"; // Removed useEffect
+import { useState } from "react"; // Removed useEffect
 import { toast } from "sonner";
-import { saveProperty } from "../../_actions/property.actions";
-
 interface PropertyFormProps {
   propertyData?: Property | null;
 }
@@ -47,8 +45,9 @@ interface PropertyFormProps {
 export default function PropertyForm({ propertyData }: PropertyFormProps) {
   const router = useRouter();
   const isEditMode = !!propertyData;
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
   const { uploadImage, isUploading } = useCloudinaryUpload();
+  const { mutateAsync: savePropertyMutate } = useSaveProperty();
 
   const { data: categoriesData } = useCategories();
   const { data: amenitiesData } = useAmenities();
@@ -117,7 +116,7 @@ export default function PropertyForm({ propertyData }: PropertyFormProps) {
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!formData.categoryId) return toast.error("Please select a category");
@@ -126,48 +125,48 @@ export default function PropertyForm({ propertyData }: PropertyFormProps) {
     if (!imageItems.some((img) => img.isPrimary))
       return toast.error("Please select one primary image");
 
-    const finalImages = [];
+    setIsLoading(true);
 
-    // This logic ensures existing URLs are NOT re-uploaded.
-    // Only new files (item.file) are uploaded to Cloudinary.
-    for (const item of imageItems) {
-      if (item.file) {
-        const url = await uploadImage(item.file);
-        if (url) {
-          finalImages.push({ url, isPrimary: item.isPrimary });
-        } else {
-          return toast.error("Image upload failed. Please try again.");
+    try {
+      const finalImages = [];
+
+      // This logic ensures existing URLs are NOT re-uploaded.
+      // Only new files (item.file) are uploaded to Cloudinary.
+      for (const item of imageItems) {
+        if (item.file) {
+          const url = await uploadImage(item.file);
+          if (url) {
+            finalImages.push({ url, isPrimary: item.isPrimary });
+          } else {
+            setIsLoading(false);
+            return toast.error("Image upload failed. Please try again.");
+          }
+        } else if (item.url) {
+          // Already has a URL from edit mode, just push it directly
+          finalImages.push({ url: item.url, isPrimary: item.isPrimary });
         }
-      } else if (item.url) {
-        // Already has a URL from edit mode, just push it directly
-        finalImages.push({ url: item.url, isPrimary: item.isPrimary });
       }
-    }
 
-    const payload = {
-      ...formData,
-      rentPrice: Number(formData.rentPrice),
-      images: finalImages,
-    };
+      const payload = {
+        ...formData,
+        rentPrice: Number(formData.rentPrice),
+        images: finalImages,
+      };
 
-    startTransition(async () => {
-      const submitData = new FormData();
-      submitData.append("payload", JSON.stringify(payload));
-
-      const result = await saveProperty(
-        propertyData?.id || null,
-        {},
-        submitData,
+      await savePropertyMutate({
+        propertyId: propertyData?.id || null,
+        payload,
+      });
+      toast.success(
+        `Property ${propertyData?.id ? "updated" : "created"} successfully!`,
       );
-
-      if (result.success) {
-        toast.success(result.message);
-        router.push("/dashboard/landlord/properties");
-        router.refresh(); // Refresh table data
-      } else {
-        toast.error(result.error);
-      }
-    });
+      router.push("/dashboard/landlord/properties");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -442,9 +441,9 @@ export default function PropertyForm({ propertyData }: PropertyFormProps) {
             type="submit"
             className="w-full"
             size="lg"
-            disabled={isPending || isUploading}
+            disabled={isLoading || isUploading}
           >
-            {isPending || isUploading ? (
+            {isLoading || isUploading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 {isUploading ? "Uploading Images..." : "Saving Property..."}
