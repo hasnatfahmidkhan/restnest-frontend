@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useDebouncedCallback } from "use-debounce"; // Import debounce
+import { useDebouncedCallback } from "use-debounce";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ export default function PropertiesTable() {
   const filters = {
     landlordId: user?.id,
     page: Number(searchParams.get("page")) || 1,
-    limit: Number(searchParams.get("limit")) || 5,
+    limit: Number(searchParams.get("limit")) || 10,
     searchTerm: searchParams.get("searchTerm") || "",
     sortBy:
       (searchParams.get("sortBy") as
@@ -89,11 +89,11 @@ export default function PropertiesTable() {
     router.push(`${pathname}?${params.toString()}`);
   }, 500);
 
-  // Handle Sort changes
-  const handleSortChange = (key: string, value: string) => {
+  // Handle Sort & Limit changes
+  const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
-    params.delete("page"); // Reset to page 1 on sort change
+    params.delete("page"); // Reset to page 1 on sort/limit change
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -112,15 +112,31 @@ export default function PropertiesTable() {
             placeholder="Search properties..."
             className="pl-9"
             defaultValue={filters.searchTerm}
-            onChange={(e) => handleSearch(e.target.value)} // Call debounced function
+            onChange={(e) => handleSearch(e.target.value)}
           />
         </div>
 
-        {/* Sort & Create Button */}
-        <div className="flex items-center gap-3">
+        {/* Sort, Limit & Create Button */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Limit Dropdown Added */}
+          <Select
+            defaultValue={String(filters.limit)}
+            onValueChange={(val) => handleFilterChange("limit", val)}
+          >
+            <SelectTrigger className="w-30">
+              <SelectValue placeholder="Items per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 / page</SelectItem>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Select
             defaultValue={filters.sortBy}
-            onValueChange={(val) => handleSortChange("sortBy", val)}
+            onValueChange={(val) => handleFilterChange("sortBy", val)}
           >
             <SelectTrigger className="w-35">
               <SelectValue placeholder="Sort by" />
@@ -134,9 +150,9 @@ export default function PropertiesTable() {
 
           <Select
             defaultValue={filters.sortOrder}
-            onValueChange={(val) => handleSortChange("sortOrder", val)}
+            onValueChange={(val) => handleFilterChange("sortOrder", val)}
           >
-            <SelectTrigger className="w-27.5">
+            <SelectTrigger className="w-32.5">
               <SelectValue placeholder="Order" />
             </SelectTrigger>
             <SelectContent>
@@ -296,7 +312,7 @@ export default function PropertiesTable() {
         itemData={selectedProperty}
         itemName={selectedProperty?.title}
         entityType="Property"
-        onDeleteAction={deleteProperty} // Pass the server action
+        onDeleteAction={deleteProperty}
         onSuccess={() =>
           queryClient.invalidateQueries({ queryKey: ["properties"] })
         }
