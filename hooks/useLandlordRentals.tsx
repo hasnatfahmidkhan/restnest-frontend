@@ -1,7 +1,11 @@
 "use client";
+import {
+  getLandlordRentalsService,
+  getRentalDetailsService,
+  updateRentalStatusService,
+} from "@/services/rental.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
 export type RentalStatus =
   | "PENDING"
@@ -65,79 +69,42 @@ export type RentalDetails = {
 export const useLandlordRentals = () => {
   return useQuery<{ success: boolean; data: LandlordRental[] }>({
     queryKey: ["landlord-rentals"],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/rentals/landlord`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // Crucial: sends the HTTP-only cookie automatically
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch rentals");
-      return res.json();
-    },
+    queryFn: getLandlordRentalsService,
   });
 };
 
 export const useRentalDetails = (rentalId: string, tenantId: string) => {
   return useQuery<{ success: boolean; data: RentalDetails }>({
     queryKey: ["rental-details", rentalId],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/rentals/${rentalId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tenantId }),
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch rental details");
-
-      return await res.json();
-    },
-    enabled: !!rentalId && !!tenantId, // Only run if both IDs exist
+    queryFn: () => getRentalDetailsService(rentalId, tenantId),
+    enabled: !!rentalId && !!tenantId,
   });
-};
-
-type UpdateStatusArgs = {
-  rentalId: string;
-  status: "APPROVED" | "REJECTED";
 };
 
 export const useUpdateRentalStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ rentalId, status }: UpdateStatusArgs) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/rentals/landlord/requests/${rentalId}`,
-        {
-          method: "PATCH",
-          credentials: "include", // Sends httpOnly cookies automatically
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status }),
-        },
+    mutationFn: ({
+      rentalId,
+      status,
+    }: {
+      rentalId: string;
+      status: "APPROVED" | "REJECTED";
+    }) => updateRentalStatusService(rentalId, status),
+
+    onSuccess: (_, variables) => {
+      toast.success(
+        variables.status === "APPROVED"
+          ? "Request Approved! Tenant can now pay."
+          : "Request Rejected.",
       );
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to update rental status");
-      }
-
-      return res.json();
+      queryClient.invalidateQueries({
+        queryKey: ["landlord-rentals"],
+      });
     },
-    onSuccess: (data, variables) => {
-      // Show success toast based on the action taken
-      if (variables.status === "APPROVED") {
-        toast.success("Request Approved! Tenant can now pay.");
-      } else {
-        toast.error("Request Rejected.");
-      }
 
-      // Invalidate the table query to refetch new data instantly
-      queryClient.invalidateQueries({ queryKey: ["landlord-rentals"] });
-    },
     onError: (error: Error) => {
       toast.error(error.message);
     },
