@@ -1,3 +1,7 @@
+import {
+  cancelRentalService,
+  getTenantRentalsService,
+} from "@/services/tenant.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -32,15 +36,9 @@ export type TenantRental = {
 };
 
 export const useTenantRentals = () => {
-  return useQuery<{ success: boolean; data: TenantRental[] }>({
+  return useQuery({
     queryKey: ["tenant-rentals"],
-    queryFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rentals`, {
-        credentials: "include", // Send httpOnly cookies
-      });
-      if (!res.ok) throw new Error("Failed to fetch your rentals");
-      return res.json();
-    },
+    queryFn: getTenantRentalsService,
   });
 };
 
@@ -48,27 +46,16 @@ export const useCancelRental = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (rentalId: string) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/rentals/tenant/requests/${rentalId}`,
-        {
-          method: "PATCH", // or POST, depending on your backend
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "CANCELED" }),
-        },
-      );
+    mutationFn: cancelRentalService,
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to cancel rental");
-      }
-      return res.json();
-    },
     onSuccess: () => {
       toast.success("Rental request canceled successfully.");
-      queryClient.invalidateQueries({ queryKey: ["tenant-rentals"] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["tenant-rentals"],
+      });
     },
+
     onError: (error: Error) => {
       toast.error(error.message);
     },
