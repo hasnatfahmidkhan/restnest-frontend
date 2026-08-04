@@ -155,7 +155,7 @@ export async function getAdminPropertiesService(query: AdminPropertyQuery) {
 }
 
 export async function getAdminRentalsService(query: AdminRentalQuery) {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");
