@@ -13,16 +13,13 @@ export const getNewAccesssToken = async () => {
     };
   }
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
-    {
-      method: "POST",
-      headers: {
-        Cookie: `refreshToken=${refreshToken}`,
-      },
-      cache: "no-cache",
+  const res = await fetch(`${process.env.BACKEND_API_URL}/auth/refresh-token`, {
+    method: "POST",
+    headers: {
+      Cookie: `refreshToken=${refreshToken}`,
     },
-  );
+    cache: "no-cache",
+  });
 
   const result = await res.json();
 
@@ -31,6 +28,7 @@ export const getNewAccesssToken = async () => {
     cookieStore.set("accessToken", result.data.accessToken, {
       httpOnly: true,
       sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 1, // 1 day
       path: "/",
     });

@@ -3,15 +3,9 @@
 import { AdminUserQuery, UserStatus } from "@/hooks/use-admin-users";
 import { AdminPropertyQuery } from "@/hooks/useAdminProperties";
 import { AdminRentalQuery } from "@/hooks/useAdminRentals";
-import { cookies } from "next/headers";
-import { getNewAccesssToken } from "./getNewAccesssToken";
+import { getValidAccessToken } from "./getValidAccessToken";
 
 const API_BASE_URL = process.env.BACKEND_API_URL as string;
-
-async function getAccessToken() {
-  const cookieStore = await cookies();
-  return cookieStore.get("accessToken")?.value;
-}
 
 export type TAdminProperty = {
   id: string;
@@ -63,7 +57,7 @@ export type TAdminProperty = {
 export type TAdminPropertyResponse = TAdminProperty[];
 
 export async function getAdminUsersService(query: AdminUserQuery) {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");
@@ -99,7 +93,7 @@ export async function updateUserStatusService(
   userId: string,
   status: UserStatus,
 ) {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");
@@ -125,7 +119,7 @@ export async function updateUserStatusService(
 }
 
 export async function getAdminPropertiesService(query: AdminPropertyQuery) {
-  const accessToken = await getNewAccesssToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");
@@ -197,7 +191,7 @@ export async function getAdminRentalsService(query: AdminRentalQuery) {
 }
 
 export async function getAdminStatsService() {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");

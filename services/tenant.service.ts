@@ -1,16 +1,11 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { getValidAccessToken } from "./getValidAccessToken";
 
 const API_BASE_URL = process.env.BACKEND_API_URL as string;
 
-async function getAccessToken() {
-  const cookieStore = await cookies();
-  return cookieStore.get("accessToken")?.value;
-}
-
 export async function getTenantRentalsService() {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");
@@ -34,7 +29,7 @@ export async function getTenantRentalsService() {
 }
 
 export async function cancelRentalService(rentalId: string) {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");
@@ -65,7 +60,7 @@ export async function cancelRentalService(rentalId: string) {
 }
 
 export async function getTenantStatsService() {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");

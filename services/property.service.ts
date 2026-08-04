@@ -1,14 +1,9 @@
 "use server";
 
 import { PropertyFilterValues } from "@/schemas/property.schema";
-import { cookies } from "next/headers";
+import { getValidAccessToken } from "./getValidAccessToken";
 
 const API_BASE_URL = process.env.BACKEND_API_URL as string;
-
-async function getAccessToken() {
-  const cookieStore = await cookies();
-  return cookieStore.get("accessToken")?.value;
-}
 
 export async function getPropertiesService(filters: PropertyFilterValues) {
   const params = new URLSearchParams();
@@ -68,7 +63,7 @@ export async function getPropertyService(
   id: string,
   role?: "ADMIN" | "LANDLORD" | "TENANT",
 ) {
-  const token = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
   const endpoint =
     role === "ADMIN"
@@ -77,9 +72,9 @@ export async function getPropertyService(
 
   const res = await fetch(endpoint, {
     cache: "no-store",
-    headers: token
+    headers: accessToken
       ? {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         }
       : {},
   });
@@ -97,9 +92,9 @@ export async function savePropertyService(
   propertyId: string | null,
   payload: unknown,
 ) {
-  const token = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
-  if (!token) {
+  if (!accessToken) {
     throw new Error("Unauthorized");
   }
 
@@ -112,7 +107,7 @@ export async function savePropertyService(
   const res = await fetch(endpoint, {
     method: isEdit ? "PATCH" : "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -131,16 +126,16 @@ export async function savePropertyService(
 }
 
 export async function deletePropertyService(propertyId: string) {
-  const token = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
-  if (!token) {
+  if (!accessToken) {
     throw new Error("Unauthorized");
   }
 
   const res = await fetch(`${API_BASE_URL}/landlord/properties/${propertyId}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     cache: "no-store",
   });

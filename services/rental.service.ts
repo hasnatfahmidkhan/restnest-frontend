@@ -1,25 +1,20 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { getValidAccessToken } from "./getValidAccessToken";
 
 const API_BASE_URL = process.env.BACKEND_API_URL as string;
 
-async function getAccessToken() {
-  const cookieStore = await cookies();
-  return cookieStore.get("accessToken")?.value;
-}
-
 export async function getLandlordRentalsService() {
-  const token = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
-  if (!token) {
+  if (!accessToken) {
     throw new Error("Unauthorized");
   }
 
   const res = await fetch(`${API_BASE_URL}/rentals/landlord`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     cache: "no-store",
@@ -38,16 +33,16 @@ export async function getRentalDetailsService(
   rentalId: string,
   tenantId: string,
 ) {
-  const token = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
-  if (!token) {
+  if (!accessToken) {
     throw new Error("Unauthorized");
   }
 
   const res = await fetch(`${API_BASE_URL}/rentals/${rentalId}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ tenantId }),
@@ -67,9 +62,9 @@ export async function updateRentalStatusService(
   rentalId: string,
   status: "APPROVED" | "REJECTED",
 ) {
-  const token = await getAccessToken();
+  const accessToken = await getValidAccessToken();
 
-  if (!token) {
+  if (!accessToken) {
     throw new Error("Unauthorized");
   }
 
@@ -78,7 +73,7 @@ export async function updateRentalStatusService(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ status }),
