@@ -32,14 +32,14 @@ export async function loginService(
 
   cookieStore.set("accessToken", accessToken, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 60 * 60 * 24 * 1, // 1 day
     path: "/",
   });
 
   cookieStore.set("refreshToken", refreshToken, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   });

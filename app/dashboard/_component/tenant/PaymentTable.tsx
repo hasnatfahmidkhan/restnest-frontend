@@ -112,7 +112,9 @@ export default function PaymentsTable() {
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground font-mono">
-                  {payment.transactionId.substring(0, 16)}...
+                  {payment.transactionId
+                    ? `${payment.transactionId.substring(0, 16)}...`
+                    : "not payment yet"}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {new Date(payment.paidAt).toLocaleDateString()}
