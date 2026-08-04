@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
+const API_BASE_URL = process.env.BACKEND_API_URL as string;
 
 async function getAccessToken() {
   const cookieStore = await cookies();

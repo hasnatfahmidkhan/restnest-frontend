@@ -1,3 +1,4 @@
+import { getLandlordStatsService } from "@/services/landlord.service";
 import { useQuery } from "@tanstack/react-query";
 
 export type LandlordStats = {
@@ -17,17 +18,7 @@ export type LandlordStats = {
 export const useLandlordStats = () => {
   return useQuery<LandlordStats>({
     queryKey: ["landlord-stats"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/landlord/stats`,
-        {
-          credentials: "include", // Send httpOnly cookies
-        },
-      );
-      if (!res.ok) throw new Error("Failed to fetch stats");
-      const data = await res.json();
-      return data.data;
-    },
+    queryFn: getLandlordStatsService,
     refetchOnWindowFocus: false,
   });
 };

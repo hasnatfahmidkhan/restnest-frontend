@@ -1,26 +1,18 @@
 import { SinglePropertyResponse } from "@/schemas/property.schema";
+import {
+  deletePropertyService,
+  getPropertyService,
+  savePropertyService,
+} from "@/services/property.service";
 import { useAuthStore } from "@/store/auth-store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
-
 export const useProperty = (id: string) => {
   const user = useAuthStore((state) => state.user);
-  const url =
-    user?.role === "ADMIN" ? `admin/properties/${id}` : `properties/${id}`;
 
   return useQuery<SinglePropertyResponse>({
     queryKey: ["property", id],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/${url}`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch property details");
-      return res.json();
-    },
+    queryFn: () => getPropertyService(id, user?.role),
     enabled: !!id, // Only run query if id exists
   });
 };
@@ -36,31 +28,7 @@ export const useSaveProperty = () => {
       propertyId: string | null;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       payload: any;
-    }) => {
-      const isEdit = !!propertyId;
-      const endpoint = isEdit
-        ? `${API_BASE_URL}/landlord/properties/${propertyId}`
-        : `${API_BASE_URL}/landlord/properties`;
-
-      const res = await fetch(endpoint, {
-        method: isEdit ? "PATCH" : "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(
-          errorData?.message ||
-            `Failed to ${isEdit ? "update" : "create"} property`,
-        );
-      }
-
-      return res.json();
-    },
+    }) => savePropertyService(propertyId, payload),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
       if (variables.propertyId) {
@@ -76,22 +44,7 @@ export const useDeleteProperty = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (propertyId: string) => {
-      const res = await fetch(
-        `${API_BASE_URL}/landlord/properties/${propertyId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to delete property");
-      }
-
-      return res.json();
-    },
+    mutationFn: deletePropertyService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
     },
