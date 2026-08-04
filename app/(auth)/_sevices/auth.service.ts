@@ -34,12 +34,14 @@ export async function loginService(
     httpOnly: true,
     sameSite: "none",
     maxAge: 60 * 60 * 24 * 1, // 1 day
+    secure: process.env.NODE_ENV === "production",
     path: "/",
   });
 
   cookieStore.set("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "none",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   });
