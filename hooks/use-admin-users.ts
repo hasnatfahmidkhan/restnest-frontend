@@ -2,10 +2,8 @@ import {
   getAdminUsersService,
   updateUserStatusService,
 } from "@/services/admin.service";
-import { getNewAccesssToken } from "@/services/getNewAccesssToken";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AdminPropertyQuery } from "./useAdminProperties";
 
 export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
 export type UserStatus = "ACTIVE" | "BAN";
@@ -66,5 +64,3 @@ export const useUpdateUserStatus = () => {
     },
   });
 };
-
-

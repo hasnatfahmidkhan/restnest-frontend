@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAdminProperties } from "@/hooks/useAdminProperties";
+import { TAdminPropertyResponse } from "@/services/admin.service";
 import { ChevronLeft, ChevronRight, ExternalLink, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,7 +51,7 @@ export default function AdminPropertiesTable() {
   };
 
   const { data, isPending, isError } = useAdminProperties(filters);
-  const properties = data?.data.properties || [];
+  const properties = (data?.data.properties as TAdminPropertyResponse) || [];
   const pagination = data?.data.pagination;
 
   const updateQuery = (key: string, value: string) => {

@@ -50,12 +50,6 @@ export type AdminRentalQuery = {
   sortOrder?: "asc" | "desc";
 };
 
-type AdminRentalsResponse = {
-  success: boolean;
-  message: string;
-  meta: { page: number; limit: number; total: number; totalPage: number };
-  data: AdminRental[];
-};
 
 export const useAdminRentals = (query: AdminRentalQuery) => {
   return useQuery({

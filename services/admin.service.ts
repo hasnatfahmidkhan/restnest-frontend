@@ -13,6 +13,55 @@ async function getAccessToken() {
   return cookieStore.get("accessToken")?.value;
 }
 
+export type TAdminProperty = {
+  id: string;
+  title: string;
+  description: string;
+  rentPrice: string;
+  address: string;
+  city: string;
+  division: string;
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
+  isAvailable: boolean;
+  categoryId: string;
+  landlordId: string;
+  createdAt: string;
+  updatedAt: string;
+
+  landlord: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+
+  category: {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+
+  propertyImages: {
+    id: string;
+    url: string;
+    isPrimary: boolean;
+    propertyId: string;
+    createdAt: string;
+  }[];
+
+  _count: {
+    rentalRequests: number;
+  };
+
+  rentalRequests: {
+    review: string | null;
+  }[];
+};
+
+export type TAdminPropertyResponse = TAdminProperty[];
+
 export async function getAdminUsersService(query: AdminUserQuery) {
   const accessToken = await getAccessToken();
 

@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  AdminRental,
   AdminRentalStatus,
   PaymentStatus,
   useAdminRentals,
@@ -84,7 +85,7 @@ export default function AdminRentalsTable() {
   };
 
   const { data, isPending, isError } = useAdminRentals(filters);
-  const rentals = data?.data || [];
+  const rentals = (data?.data as AdminRental[]) || [];
   const meta = data?.meta;
 
   const updateQuery = (key: string, value: string) => {
