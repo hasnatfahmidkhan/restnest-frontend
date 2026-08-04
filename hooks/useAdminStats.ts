@@ -1,3 +1,4 @@
+import { getAdminStatsService } from "@/services/admin.service";
 import { useQuery } from "@tanstack/react-query";
 
 export type AdminStats = {
@@ -32,17 +33,7 @@ export type AdminStats = {
 export const useAdminStats = () => {
   return useQuery<AdminStats>({
     queryKey: ["admin-stats"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/stats`,
-        {
-          credentials: "include",
-        },
-      );
-      if (!res.ok) throw new Error("Failed to fetch admin stats");
-      const data = await res.json();
-      return data.data;
-    },
+    queryFn: getAdminStatsService,
     refetchOnWindowFocus: false,
   });
 };

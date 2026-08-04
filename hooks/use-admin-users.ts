@@ -1,5 +1,11 @@
+import {
+  getAdminUsersService,
+  updateUserStatusService,
+} from "@/services/admin.service";
+import { getNewAccesssToken } from "@/services/getNewAccesssToken";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AdminPropertyQuery } from "./useAdminProperties";
 
 export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
 export type UserStatus = "ACTIVE" | "BAN";
@@ -36,24 +42,7 @@ type AdminUsersResponse = {
 export const useAdminUsers = (query: AdminUserQuery) => {
   return useQuery<AdminUsersResponse>({
     queryKey: ["admin-users", query],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-
-      Object.entries(query).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          params.append(key, String(value));
-        }
-      });
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/users?${params.toString()}`,
-        {
-          credentials: "include",
-        },
-      );
-      if (!res.ok) throw new Error("Failed to fetch users");
-      return res.json();
-    },
+    queryFn: () => getAdminUsersService(query),
   });
 };
 
@@ -61,35 +50,21 @@ export const useUpdateUserStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      userId,
-      status,
-    }: {
-      userId: string;
-      status: UserStatus;
-    }) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}`,
-        {
-          method: "PATCH",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
-        },
-      );
+    mutationFn: ({ userId, status }: { userId: string; status: UserStatus }) =>
+      updateUserStatusService(userId, status),
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to update user status");
-      }
-      return res.json();
-    },
     onSuccess: (data) => {
       toast.success(data.message || "User status updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["admin-users"],
+      });
     },
+
     onError: (error: Error) => {
       toast.error(error.message);
     },
   });
 };
+
+

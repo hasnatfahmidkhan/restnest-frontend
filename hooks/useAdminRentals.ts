@@ -1,3 +1,4 @@
+import { getAdminRentalsService } from "@/services/admin.service";
 import { useQuery } from "@tanstack/react-query";
 
 export type AdminRentalStatus =
@@ -57,24 +58,8 @@ type AdminRentalsResponse = {
 };
 
 export const useAdminRentals = (query: AdminRentalQuery) => {
-  return useQuery<AdminRentalsResponse>({
+  return useQuery({
     queryKey: ["admin-rentals", query],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      Object.entries(query).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          params.append(key, String(value));
-        }
-      });
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/rentals?${params.toString()}`,
-        {
-          credentials: "include",
-        },
-      );
-      if (!res.ok) throw new Error("Failed to fetch rentals");
-      return res.json();
-    },
+    queryFn: () => getAdminRentalsService(query),
   });
 };

@@ -1,4 +1,4 @@
-import { Property } from "@/schemas/property.schema";
+import { getAdminPropertiesService } from "@/services/admin.service";
 import { useQuery } from "@tanstack/react-query";
 
 export type AdminPropertyQuery = {
@@ -14,40 +14,9 @@ export type AdminPropertyQuery = {
   availability?: boolean;
 };
 
-type AdminPropertiesResponse = {
-  success: boolean;
-  message: string;
-  data: {
-    properties: Property[];
-    pagination: {
-      total: number;
-      pageNumber: number;
-      limit: number;
-      totalPage: number;
-    };
-  };
-};
-
 export const useAdminProperties = (query: AdminPropertyQuery) => {
-  return useQuery<AdminPropertiesResponse>({
+  return useQuery({
     queryKey: ["admin-properties", query],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-
-      Object.entries(query).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          params.append(key, String(value));
-        }
-      });
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/properties?${params.toString()}`,
-        {
-          credentials: "include",
-        },
-      );
-      if (!res.ok) throw new Error("Failed to fetch properties");
-      return res.json();
-    },
+    queryFn: () => getAdminPropertiesService(query),
   });
 };
