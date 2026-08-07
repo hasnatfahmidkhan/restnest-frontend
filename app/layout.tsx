@@ -7,6 +7,7 @@ import { LenisProvider } from "@/providers/LenisProvider";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Geist, Plus_Jakarta_Sans } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -38,7 +39,9 @@ export default function RootLayout({
                 <Toaster richColors position="top-right" closeButton />
                 <TooltipProvider>
                   {children}
-                  <ScrollToTop />
+                  <Suspense fallback={null}>
+                    <ScrollToTop />
+                  </Suspense>
                 </TooltipProvider>
               </AuthProvider>
             </ReactQueryProvider>

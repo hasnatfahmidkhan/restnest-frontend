@@ -32,7 +32,7 @@ export default function ContactForm() {
   const onSubmit = async (data: ContactValues) => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log(data);
+
     toast.success("Message sent successfully! We'll get back to you soon.");
     reset();
   };

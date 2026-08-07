@@ -35,7 +35,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const user = useAuthStore((state) => state.user);
-  console.log(user);
+
   const routes: NavRoute[] = user
     ? [
         { label: "Home", href: "/" },

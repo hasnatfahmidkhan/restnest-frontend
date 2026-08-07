@@ -102,7 +102,7 @@ export async function getMeService(): Promise<IUser> {
   });
 
   const data = await response.json();
-  console.log(data);
+
 
   if (!response.ok || !data.success) {
     throw new Error(data.message || "Session expired");
