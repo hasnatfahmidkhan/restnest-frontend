@@ -48,5 +48,5 @@ export default function EditPropertyPage({
     );
   }
 
-  return <PropertyForm propertyData={data.data} />;
+  return <PropertyForm propertyData={data.data.property} />;
 }
