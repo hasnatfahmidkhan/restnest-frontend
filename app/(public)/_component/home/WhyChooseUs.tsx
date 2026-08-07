@@ -41,7 +41,7 @@ export default function WhyChooseUs() {
       />
 
       {/* Background Glow */}
-      <div className="absolute left-1/2 top-1/2 -z-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute left-1/2 top-1/2 z-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
 
       <Container className="relative z-10">
         {/* Section Header */}

@@ -1,9 +1,9 @@
+import { jwtUtils } from "@/lib/jwt";
+import { AUTH_ROUTES, PUBLIC_ROUTES } from "@/routes";
 import { JwtPayload } from "jsonwebtoken";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { match } from "path-to-regexp";
-import { jwtUtils } from "./lib/jwt";
-import { AUTH_ROUTES, PUBLIC_ROUTES } from "./routes";
 
 const publicMatchers = PUBLIC_ROUTES.map((route) =>
   match(route, { decode: decodeURIComponent }),
@@ -23,19 +23,19 @@ export async function proxy(request: NextRequest) {
   let accessToken = request.cookies.get("accessToken")?.value;
   const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  let decodedAccessToken = accessToken
-    ? jwtUtils.verifyJWTToken(
-        accessToken,
-        process.env.JWT_ACCESS_SECRET as string,
-      )
-    : null;
+  // Safe check for secrets to prevent Edge runtime crashes
+  const accessSecret = process.env.JWT_ACCESS_SECRET as string;
+  const refreshSecret = process.env.JWT_REFRESH_SECRET as string;
 
-  const decodedRefreshToken = refreshToken
-    ? jwtUtils.verifyJWTToken(
-        refreshToken,
-        process.env.JWT_REFRESH_SECRET as string,
-      )
-    : null;
+  let decodedAccessToken =
+    accessToken && accessSecret
+      ? jwtUtils.verifyJWTToken(accessToken, accessSecret)
+      : null;
+
+  const decodedRefreshToken =
+    refreshToken && refreshSecret
+      ? jwtUtils.verifyJWTToken(refreshToken, refreshSecret)
+      : null;
 
   const response = NextResponse.next();
 
@@ -71,7 +71,7 @@ export async function proxy(request: NextRequest) {
 
           decodedAccessToken = jwtUtils.verifyJWTToken(
             accessToken,
-            process.env.JWT_ACCESS_SECRET as string,
+            accessSecret,
           );
         }
       }
@@ -91,15 +91,12 @@ export async function proxy(request: NextRequest) {
 
   const userRole = user?.role ?? null;
 
-  /**
-   * Cleanup invalid cookies
-   */
-  if (!isAuthenticated) {
+  if (!isAuthenticated && accessToken) {
     response.cookies.delete("accessToken");
+  }
 
-    if (!decodedRefreshToken?.success) {
-      response.cookies.delete("refreshToken");
-    }
+  if (!isAuthenticated && refreshToken && !decodedRefreshToken?.success) {
+    response.cookies.delete("refreshToken");
   }
 
   /**
@@ -141,6 +138,7 @@ export async function proxy(request: NextRequest) {
 
     const redirect = NextResponse.redirect(loginUrl);
 
+    // Preserve any valid cookies (like a valid refresh token)
     response.cookies.getAll().forEach((cookie) => {
       redirect.cookies.set(cookie);
     });

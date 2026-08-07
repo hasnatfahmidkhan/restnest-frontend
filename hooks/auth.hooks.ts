@@ -123,6 +123,7 @@ export const useInitializeAuth = () => {
     queryKey: ["auth-me"],
     queryFn: async () => {
       const user = await getMeService();
+     
       // Save to Zustand global state
       setUser(user);
       return user;

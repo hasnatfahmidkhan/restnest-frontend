@@ -1,5 +1,6 @@
 "use server";
 
+import { getValidAccessToken } from "@/services/getValidAccessToken";
 import { cookies } from "next/headers";
 import { TLoginInput, TRegisterInput } from "../_schemas/auth.schema";
 import { ILoginResponse, ILoginResponseRaw, IUser } from "../_types/auth.types";
@@ -32,7 +33,7 @@ export async function loginService(
 
   cookieStore.set("accessToken", accessToken, {
     httpOnly: true,
-    sameSite: "none",
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 1, // 1 day
     secure: process.env.NODE_ENV === "production",
     path: "/",
@@ -40,7 +41,7 @@ export async function loginService(
 
   cookieStore.set("refreshToken", refreshToken, {
     httpOnly: true,
-    sameSite: "none",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
@@ -85,8 +86,7 @@ export async function registerService(
 }
 
 export async function getMeService(): Promise<IUser> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
+  const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("No access token found");
@@ -102,6 +102,7 @@ export async function getMeService(): Promise<IUser> {
   });
 
   const data = await response.json();
+  console.log(data);
 
   if (!response.ok || !data.success) {
     throw new Error(data.message || "Session expired");
