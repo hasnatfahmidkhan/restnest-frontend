@@ -1,4 +1,4 @@
-import { Home, Mail, X } from "lucide-react";
+import { Home, Mail } from "lucide-react";
 import Link from "next/link";
 import { GitHubIcon, LinkedInIcon } from "../icons/icons";
 import { Container } from "./container";
@@ -42,18 +42,26 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/landlord/dashboard"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  List Property
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/how-it-works"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   How it Works
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-muted-foreground transition-colors hover:text-primary"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Contact Us
                 </Link>
               </li>
             </ul>
@@ -65,7 +73,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  href="/"
+                  href="/help-center"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   Help Center
@@ -97,28 +105,21 @@ export function Footer() {
             </h4>
             <div className="flex items-center gap-2">
               <Link
-                href="#"
-                aria-label="X"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Link>
-              <Link
-                href="#"
+                href="https://github.com/hasnatfahmidkhan"
                 aria-label="GitHub"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <GitHubIcon className="h-4 w-4" />
               </Link>
               <Link
-                href="#"
+                href="https://www.linkedin.com/in/hasnatfahmid"
                 aria-label="LinkedIn"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <LinkedInIcon className="h-4 w-4" />
               </Link>
               <Link
-                href="#"
+                href="hasnatfahmidkhan@gmail.com"
                 aria-label="Email"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >

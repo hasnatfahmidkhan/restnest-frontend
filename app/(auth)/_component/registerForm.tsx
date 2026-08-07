@@ -60,7 +60,6 @@ export function RegisterForm() {
   };
 
   async function onSubmit(data: TRegisterInput) {
-  
     const fileInput = document.getElementById(
       "register-photo",
     ) as HTMLInputElement;
@@ -176,7 +175,7 @@ export function RegisterForm() {
                   >
                     <Label
                       htmlFor="role-tenant"
-                      className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-input p-4 hover:bg-accent transition-colors [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary/5"
+                      className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-input p-4 hover:bg-accent transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
                     >
                       <RadioGroupItem
                         value="TENANT"
@@ -190,7 +189,7 @@ export function RegisterForm() {
                     </Label>
                     <Label
                       htmlFor="role-landlord"
-                      className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-input p-4 hover:bg-accent transition-colors [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary/5"
+                      className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-input p-4 hover:bg-accent transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
                     >
                       <RadioGroupItem
                         value="LANDLORD"
