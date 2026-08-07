@@ -83,5 +83,8 @@ export type SelectableResponse = {
 export type SinglePropertyResponse = {
   success: boolean;
   message: string;
-  data: Property;
+  data: {
+    property: Property;
+    recommendedProperties: Property[];
+  };
 };

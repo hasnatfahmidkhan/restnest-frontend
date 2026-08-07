@@ -6,26 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useProperty } from "@/hooks/useProperty";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   Bath,
   BedDouble,
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   ImageOff,
   MapPin,
   Maximize,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import PropertyDetailsSkeleton from "./propertyDetailsSkeleton";
 import RentRequestDialog from "./rentRequestDialog";
 
 export default function PropertyDetails({ id }: { id: string }) {
   const { data, isPending, isError } = useProperty(id);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   if (isPending) return <PropertyDetailsSkeleton />;
 
-  if (isError || !data?.success) {
+  if (isError || !data?.success || !data?.data?.property) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-bold text-destructive mb-4">
@@ -41,23 +47,29 @@ export default function PropertyDetails({ id }: { id: string }) {
     );
   }
 
-  const property = data.data;
+  const { property, recommendedProperties } = data.data;
 
-  // Handle empty image arrays gracefully
   const hasImages =
     property.propertyImages && property.propertyImages.length > 0;
-  const primaryImage = hasImages
-    ? property.propertyImages.find((img) => img.isPrimary) ||
-      property.propertyImages[0]
-    : null;
-  const galleryImages = hasImages
-    ? property.propertyImages
-        .filter((img) => img.id !== primaryImage?.id)
-        .slice(0, 4)
-    : [];
+  const allImages = hasImages ? property.propertyImages : [];
+
+  // Lightbox navigation handlers
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLightboxIndex((prev) =>
+      prev !== null ? (prev + 1) % allImages.length : null,
+    );
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLightboxIndex((prev) =>
+      prev !== null ? (prev - 1 + allImages.length) % allImages.length : null,
+    );
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Breadcrumb / Back Button */}
       <Link
         href="/properties"
@@ -69,58 +81,65 @@ export default function PropertyDetails({ id }: { id: string }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Images & Description */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Image Gallery */}
-          <div className="grid grid-cols-4 grid-rows-2 gap-3 h-125">
-            {hasImages ? (
-              <>
-                {/* Main Image */}
-                <div className="col-span-4 md:col-span-2 row-span-2 rounded-xl overflow-hidden relative group">
-                  {primaryImage ? (
-                    <Image
-                      src={primaryImage.url}
-                      alt={property.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
-                      <ImageOff className="w-10 h-10" />
-                      <span className="text-xs">No image available</span>
+          {/* Airbnb-Style Image Gallery */}
+          {hasImages ? (
+            <div className="grid grid-cols-4 grid-rows-2 gap-2 h-75 md:h-125 rounded-2xl overflow-hidden">
+              {/* Main Large Image (Left) */}
+              <div
+                className="col-span-4 md:col-span-2 row-span-2 relative group cursor-pointer overflow-hidden"
+                onClick={() => setLightboxIndex(0)}
+              >
+                <Image
+                  src={allImages[0].url}
+                  alt={property.title}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+
+              {/* Secondary Images (Right 2x2 Grid) */}
+              {allImages.slice(1, 5).map((img, idx) => (
+                <div
+                  key={img.id}
+                  className="hidden md:block relative group cursor-pointer overflow-hidden"
+                  onClick={() => setLightboxIndex(idx + 1)}
+                >
+                  <Image
+                    src={img.url}
+                    alt={`${property.title} ${idx + 2}`}
+                    fill
+                    sizes="25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  {/* Show "View All" overlay on the 4th image if there are more than 5 */}
+                  {idx === 3 && allImages.length > 5 && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="text-white font-semibold text-lg">
+                        +{allImages.length - 5} More
+                      </span>
                     </div>
                   )}
                 </div>
-                {/* Gallery Images */}
-                {galleryImages.map((img) => (
-                  <div
-                    key={img.id}
-                    className="hidden md:block rounded-xl overflow-hidden relative group"
-                  >
-                    <Image
-                      src={img.url}
-                      alt={property.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      fill
-                    />
-                  </div>
-                ))}
-                {/* Fallbacks for grid layout if less than 4 gallery images */}
-                {Array.from({
-                  length: Math.max(0, 4 - galleryImages.length),
-                }).map((_, i) => (
-                  <div
-                    key={`empty-${i}`}
-                    className="hidden md:block rounded-xl bg-muted border border-dashed"
-                  />
-                ))}
-              </>
-            ) : (
-              <div className="col-span-4 row-span-2 rounded-xl bg-muted border border-dashed flex flex-col items-center justify-center text-muted-foreground gap-2">
-                <ImageOff className="w-12 h-12" />
-                <span>No images provided for this property</span>
-              </div>
-            )}
-          </div>
+              ))}
+
+              {/* Fallback placeholders if less than 5 images */}
+              {Array.from({
+                length: Math.max(0, 4 - (allImages.length - 1)),
+              }).map((_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className="hidden md:block bg-muted border border-dashed rounded-md"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="h-75 md:h-125 flex flex-col items-center justify-center rounded-2xl bg-muted border border-dashed  text-muted-foreground gap-2">
+              <ImageOff className="w-12 h-12" />
+              <span>No images provided for this property</span>
+            </div>
+          )}
 
           {/* Header Info */}
           <div className="space-y-4">
@@ -180,7 +199,7 @@ export default function PropertyDetails({ id }: { id: string }) {
 
           <Separator />
 
-          {/* Description */}
+          {/* Description & Amenities (Same as before) */}
           <div className="space-y-4">
             <h2 className="text-xl font-heading font-semibold">
               About this property
@@ -190,7 +209,6 @@ export default function PropertyDetails({ id }: { id: string }) {
             </p>
           </div>
 
-          {/* Amenities */}
           {property.propertyAmenities &&
             property.propertyAmenities.length > 0 && (
               <div className="space-y-4">
@@ -212,7 +230,7 @@ export default function PropertyDetails({ id }: { id: string }) {
             )}
         </div>
 
-        {/* Right Column: Pricing & Rent Request */}
+        {/* Right Column: Pricing & Rent Request (Same as before) */}
         <div className="space-y-6">
           <Card className="lg:sticky lg:top-8 shadow-md">
             <CardHeader>
@@ -240,27 +258,148 @@ export default function PropertyDetails({ id }: { id: string }) {
                   </span>
                 </div>
               </div>
-
               <Separator />
-
               <div className="space-y-3">
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-foreground">
-                    Interested in this place?
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Submit a rent request to the landlord to initiate the
-                    booking process for this property.
-                  </p>
-
-                  {/* Replace the old Button with this Dialog Component */}
-                  <RentRequestDialog propertyId={property.id} />
-                </div>
+                <h3 className="font-semibold text-foreground">
+                  Interested in this place?
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Submit a rent request to the landlord to initiate the booking
+                  process for this property.
+                </p>
+                <RentRequestDialog propertyId={property.id} />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Recommended Properties Section (Same as before) */}
+      {recommendedProperties && recommendedProperties.length > 0 && (
+        <div className="mt-16 pt-8 border-t">
+          <h2 className="text-2xl font-heading font-bold text-foreground mb-6">
+            Recommended Properties
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recommendedProperties.map((rec) => {
+              const recPrimaryImage =
+                rec.propertyImages?.find((img) => img.isPrimary) ||
+                rec.propertyImages?.[0];
+              return (
+                <Link
+                  href={`/properties/${rec.id}`}
+                  key={rec.id}
+                  className="group block rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300 bg-card"
+                >
+                  <div className="relative h-40 bg-muted overflow-hidden">
+                    {recPrimaryImage ? (
+                      <Image
+                        src={recPrimaryImage.url}
+                        alt={rec.title}
+                        fill
+                        sizes="300px"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ImageOff className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                      {rec.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1 mb-3">
+                      <MapPin className="w-3 h-3" /> {rec.city}, {rec.division}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-primary">
+                        ${rec.rentPrice}
+                        <span className="text-xs font-normal text-muted-foreground">
+                          /mo
+                        </span>
+                      </span>
+                      <div className="flex gap-2 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <BedDouble className="w-3 h-3" /> {rec.bedrooms}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Maximize className="w-3 h-3" /> {rec.area}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Premium Full-Screen Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && allImages.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-100 bg-black/95 flex items-center justify-center p-4"
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Close Button */}
+            <button
+              className="absolute top-6 right-6 text-white/80 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-50"
+              onClick={() => setLightboxIndex(null)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+
+            {/* Previous Button */}
+            {allImages.length > 1 && (
+              <button
+                className="absolute left-6 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 transition-colors z-50"
+                onClick={handlePrev}
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+            )}
+
+            {/* Image Container */}
+            <motion.div
+              key={lightboxIndex}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="relative w-full h-full max-w-5xl max-h-[85vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={allImages[lightboxIndex].url}
+                alt={property.title}
+                fill
+                sizes="100vw"
+                className="object-contain"
+              />
+            </motion.div>
+
+            {/* Next Button */}
+            {allImages.length > 1 && (
+              <button
+                className="absolute right-6 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 transition-colors z-50"
+                onClick={handleNext}
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            )}
+
+            {/* Image Counter */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-white text-sm font-medium">
+              {lightboxIndex + 1} / {allImages.length}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
