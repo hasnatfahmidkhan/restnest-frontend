@@ -110,3 +110,41 @@ export async function getMeService(): Promise<IUser> {
 
   return data.data as IUser;
 }
+
+export async function googleLoginService(idToken: string) {
+  const response = await fetch(`${API_BASE_URL}/auth/google`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ idToken }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Google login failed");
+  }
+
+  const cookieStore = await cookies();
+  const { accessToken, refreshToken } = data.data;
+
+  cookieStore.set("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 1, // 1 day
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+
+  cookieStore.set("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
+  });
+
+  return data;
+}

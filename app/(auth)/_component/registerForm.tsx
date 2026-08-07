@@ -27,8 +27,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { useRegister } from "@/hooks/auth.hooks";
 import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
+import { GoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
+import { toast } from "sonner";
 import { registerSchema, TRegisterInput } from "../_schemas/auth.schema";
+import { googleLoginService } from "../_sevices/auth.service";
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -88,6 +91,22 @@ export function RegisterForm() {
     }
   }
 
+  // Google Login Handler
+  const handleGoogleLogin = async (credentialResponse: any) => {
+    try {
+      const idToken = credentialResponse.credential;
+      if (!idToken) throw new Error("Google authentication failed.");
+
+      await googleLoginService(idToken);
+      toast.success("Registered successfully with Google!");
+
+      // Hard redirect to ensure cookies are picked up by the browser
+      window.location.href = "/dashboard/tenant";
+    } catch (error: any) {
+      toast.error(error.message || "Google registration failed");
+    }
+  };
+
   const isDisabled = isPending || isUploading;
 
   return (
@@ -98,7 +117,31 @@ export function RegisterForm() {
           Join RestNest today to find or list properties.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {/* Google Login Button */}
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => toast.error("Google Registration Failed")}
+            text="continue_with"
+            shape="pill"
+            width="320"
+            
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or register with email
+            </span>
+          </div>
+        </div>
+
         <form id="register-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             {/* Profile Photo Upload */}
