@@ -1,3 +1,4 @@
+import ScrollToTop from "@/components/shared/ScrollToTop";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -35,7 +36,10 @@ export default function RootLayout({
             <ReactQueryProvider>
               <AuthProvider>
                 <Toaster richColors position="top-right" closeButton />
-                <TooltipProvider>{children}</TooltipProvider>
+                <TooltipProvider>
+                  {children}
+                  <ScrollToTop />
+                </TooltipProvider>
               </AuthProvider>
             </ReactQueryProvider>
           </ThemeProvider>

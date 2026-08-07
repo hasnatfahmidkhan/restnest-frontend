@@ -173,6 +173,10 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer utilities {
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
@@ -215,4 +219,3 @@
     }
   }
 }
-
