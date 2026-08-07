@@ -85,6 +85,6 @@ export type SinglePropertyResponse = {
   message: string;
   data: {
     property: Property;
-    recommendedProperties: Property[];
+    recommendedProperties?: Property[];
   };
 };
