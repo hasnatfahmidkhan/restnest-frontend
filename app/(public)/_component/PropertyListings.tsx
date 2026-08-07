@@ -7,7 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProperties } from "@/hooks/useProperties";
 import { propertyFilterSchema } from "@/schemas/property.schema";
-import { Bath, BedDouble, ImageOff, MapPin, Maximize } from "lucide-react";
+import {
+  Bath,
+  BedDouble,
+  ImageOff,
+  MapPin,
+  Maximize,
+  RotateCw,
+  ServerCrash,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ListingsSkeleton } from "./FiltersSkeleton";
@@ -27,13 +35,30 @@ export default function PropertyListings() {
   const filters = propertyFilterSchema.parse(rawParams);
 
   // Renaming isLoading to isPending as requested
-  const { data, isPending, isError } = useProperties(filters);
+  const { data, isPending, isError, refetch } = useProperties(filters);
 
   // Show skeleton immediately when isPending is true
   if (isPending) return <ListingsSkeleton />;
 
-  if (isError)
-    return <div className="text-destructive">Error loading properties.</div>;
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 border border-dashed rounded-xl text-center bg-card">
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+          <ServerCrash className="w-8 h-8 text-destructive" />
+        </div>
+        <h3 className="text-xl font-heading font-semibold text-foreground mb-2">
+          Failed to Load Properties
+        </h3>
+        <p className="text-muted-foreground mb-6 max-w-sm">
+          We couldn&apos;t fetch the properties due to a network or server
+          issue. Please check your connection and try again.
+        </p>
+        <Button onClick={() => refetch()} className="gap-2">
+          <RotateCw className="w-4 h-4" /> Try Again
+        </Button>
+      </div>
+    );
+  }
 
   const properties = data?.data.properties || [];
   const pagination = data?.data.pagination;
