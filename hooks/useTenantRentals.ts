@@ -35,10 +35,18 @@ export type TenantRental = {
   };
 };
 
-export const useTenantRentals = () => {
+export interface TenantRentalsQuery {
+  searchTerm?: string;
+  status?: TenantRentalStatus;
+  page?: number;
+  limit?: number;
+}
+
+export const useTenantRentals = (query: TenantRentalsQuery) => {
   return useQuery({
-    queryKey: ["tenant-rentals"],
-    queryFn: getTenantRentalsService,
+    queryKey: ["tenant-rentals", query],
+    queryFn: () => getTenantRentalsService(query),
+    placeholderData: (previousData) => previousData,
   });
 };
 

@@ -1,17 +1,32 @@
 "use server";
 
+import { TenantRentalsQuery } from "@/hooks/useTenantRentals";
 import { getValidAccessToken } from "./getValidAccessToken";
 
 const API_BASE_URL = process.env.BACKEND_API_URL as string;
 
-export async function getTenantRentalsService() {
+export async function getTenantRentalsService(query: TenantRentalsQuery) {
   const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
     throw new Error("Unauthorized");
   }
 
-  const res = await fetch(`${API_BASE_URL}/rentals`, {
+  const params = new URLSearchParams();
+
+  if (query.searchTerm?.trim()) {
+    params.set("searchTerm", query.searchTerm.trim());
+  }
+
+  if (query.status) {
+    params.set("status", query.status);
+  }
+
+  params.set("page", String(query.page ?? 1));
+
+  params.set("limit", String(query.limit ?? 10));
+
+  const res = await fetch(`${API_BASE_URL}/rentals?${params.toString()}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
