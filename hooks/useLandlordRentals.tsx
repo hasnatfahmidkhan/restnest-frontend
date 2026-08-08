@@ -2,6 +2,7 @@
 import {
   getLandlordRentalsService,
   getRentalDetailsService,
+  LandlordRentalsQuery,
   updateRentalStatusService,
 } from "@/services/rental.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,10 +67,11 @@ export type RentalDetails = {
   };
 };
 
-export const useLandlordRentals = () => {
-  return useQuery<{ success: boolean; data: LandlordRental[] }>({
-    queryKey: ["landlord-rentals"],
-    queryFn: getLandlordRentalsService,
+export const useLandlordRentals = (query: LandlordRentalsQuery) => {
+  return useQuery({
+    queryKey: ["landlord-rentals", query],
+    queryFn: () => getLandlordRentalsService(query),
+    placeholderData: (previousData) => previousData,
   });
 };
 
